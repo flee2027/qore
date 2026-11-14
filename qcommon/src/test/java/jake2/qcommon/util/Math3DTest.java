@@ -17,7 +17,7 @@ public class Math3DTest {
     @Test
     public void createVectorWithSomeNumsAndCheckHisVectorLength(){
         float[] vec = {0.5f,2.0f,10.0f};
-        assertEquals(10.21f, Math3D.VectorLength(vec), 0.01f);
+        assertEquals(10.2103f, Math3D.VectorLength(vec), 0.0001f);
     }
 
     @Test
@@ -50,14 +50,21 @@ public class Math3DTest {
     public void createVectorsAndCheckThereEqualOrNot(){
         float[] vec1 = {1.0f,2.0f,3.0f};
         float[] vec2 = {1.0f,2.0f,3.0f};
-        assertEquals(true, Math3D.VectorEquals(vec1,vec2));
+        assertTrue(Math3D.VectorEquals(vec1,vec2));
     }
 
     @Test
     public void createVectorsAndCheckThereEqualOrNotButThereActuallyNotEqual(){
         float[] vec1 = {1.0f,2.0f,3.0f};
         float[] vec2 = {1.0f,2.0f,5.0f};
-        assertEquals(false, Math3D.VectorEquals(vec1,vec2));
+        assertFalse(Math3D.VectorEquals(vec1,vec2));
+    }
+
+    @Test
+    public void createVectorsAndAddALittleDiffrenceBetweenThemAncCheckEqual(){
+        float[] vec1 = {1.0f,2.0f,3.0f};
+        float[] vec2 = {1.0001f,2.0f,3.0f};
+        assertFalse(Math3D.VectorEquals(vec1,vec2));
     }
 
 }

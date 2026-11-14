@@ -182,6 +182,8 @@ public class GameBase {
         return choice[Lib.rand() % num_choices];
     }
 
+    //TODO: Чо она тут делает нахуй? Наверх потом отправлю. Приколист хуев
+
     private static final float[] VEC_UP = { 0, -1, 0 };
 
     private static final float[] MOVEDIR_UP = { 0, 0, 1 };

@@ -61,6 +61,7 @@ public class GameBaseTest {
         float[] out = {0.0f,0.0f,0.0f};
 
         assertEquals(1,GameBase.ClipVelocity(in,normal,out,1));
+        assertArrayEquals(new float[]{0.0f,0.0f,0.0f}, out, 0.0001f);
     }
 
 }
