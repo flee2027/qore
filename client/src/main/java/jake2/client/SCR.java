@@ -1265,6 +1265,7 @@ public final class SCR extends Globals {
 
                 DrawPause();
                 DrawConsole();
+                Menu.UpdateMouse();
                 Menu.Draw();
                 DrawLoading();
             }

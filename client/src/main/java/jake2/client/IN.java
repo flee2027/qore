@@ -64,12 +64,24 @@ public final class IN extends Globals {
         }
     }
 
+    public static void ActivateMenuMouse() {
+        if (!mouse_avail) return;
+        ClientGlobals.re.getKeyboardHandler().uninstallGrabs();
+        mouse_active = false;
+    }
+
     public static void DeactivateMouse() {
         // if (!mouse_avail || c == null) return;
         if (mouse_active) {
             uninstall_grabs();
             mouse_active = false;
         }
+    }
+
+    public static void DeactivateMenuMouse() {
+        if (!mouse_avail) return;
+        ClientGlobals.re.getKeyboardHandler().installGrabs();
+        mouse_active = true;
     }
 
     private static void install_grabs() {

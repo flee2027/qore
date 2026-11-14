@@ -37,6 +37,7 @@ import jake2.qcommon.sys.Sys;
 import jake2.qcommon.sys.Timer;
 import jake2.qcommon.util.Lib;
 import jake2.qcommon.util.Math3D;
+import org.lwjgl.input.Mouse;
 
 import java.awt.*;
 import java.io.RandomAccessFile;
@@ -44,6 +45,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+
+import static jake2.client.ClientGlobals.cls;
 
 /**
  * Menu
@@ -58,6 +61,14 @@ abstract class keyfunc_t {
 public final class Menu extends Key {
 
     private static int m_main_cursor;
+
+    private static int m_main_xoffset;
+
+    private static int m_main_widest;
+
+    private static int m_main_ystart;
+
+    private static boolean m_isMainMenu = false;
 
     private static final int NUM_CURSOR_FRAMES = 15;
 
@@ -75,6 +86,10 @@ public final class Menu extends Key {
 
     private static keyfunc_t m_keyfunc;
 
+    private static menuframework_s m_currentMenu;
+
+    private static boolean prevMouseDown = false;
+
     //	  =============================================================================
     /* Support Routines */
 
@@ -84,6 +99,14 @@ public final class Menu extends Key {
         Command draw;
 
         keyfunc_t key;
+    }
+
+    private static int getMouseX() {
+        return Mouse.getX();
+    }
+
+    private static int getMouseY() {
+        return Mouse.getY();
     }
 
     static class menuframework_s {
@@ -102,6 +125,19 @@ public final class Menu extends Key {
         //void (*cursordraw)( struct _tag_menuframework *m );
         mcallback cursordraw;
 
+    }
+
+    private static int getItemUnderMouse(menuframework_s menu) {
+        int mx = getMouseX();
+        int my = getMouseY();
+        for (int i = 0; i < menu.nitems; i++) {
+            menucommon_s item = menu.items[i];
+            if (mx >= item.x && mx <= item.x + 200 &&
+                    my >= item.y && my <= item.y + 40) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     abstract static class mcallback {
@@ -134,6 +170,10 @@ public final class Menu extends Key {
         mcallback ownerdraw;
 
         mcallback cursordraw;
+    }
+
+    private static menuframework_s getCurrentMenu(){
+        return m_currentMenu;
     }
 
     static class menufield_s extends menucommon_s {
@@ -193,6 +233,8 @@ public final class Menu extends Key {
         if (Cvar.getInstance().VariableValue("maxclients") == 1 && Globals.server_state != ServerStates.SS_DEAD)
             Cvar.getInstance().Set("paused", "1");
 
+        Mouse.setGrabbed(false);
+
         // if this menu is already present, drop back to that level
         // to avoid stacking menus by hotkeys
         for (i = 0; i < m_menudepth; i++)
@@ -213,13 +255,14 @@ public final class Menu extends Key {
 
         m_entersound = true;
 
-        ClientGlobals.cls.key_dest = key_menu;
+        cls.key_dest = key_menu;
     }
 
     static void ForceMenuOff() {
         m_drawfunc = null;
         m_keyfunc = null;
-        ClientGlobals.cls.key_dest = key_game;
+        Mouse.setGrabbed(true);
+        cls.key_dest = key_game;
         m_menudepth = 0;
         Key.ClearStates();
         Cvar.getInstance().Set("paused", "0");
@@ -452,7 +495,7 @@ public final class Menu extends Key {
         ClientGlobals.re.DrawPic(xoffset, ystart + m_main_cursor * 40 + 13, litname);
 
         DrawCursor(xoffset - 25, ystart + m_main_cursor * 40 + 11,
-                (int) ((ClientGlobals.cls.realtime / 100)) % NUM_CURSOR_FRAMES);
+                (int) ((cls.realtime / 100)) % NUM_CURSOR_FRAMES);
 
         ClientGlobals.re.DrawGetPicSize(dim, "m_main_plaque");
         w = dim.width;
@@ -460,6 +503,11 @@ public final class Menu extends Key {
         ClientGlobals.re.DrawPic(xoffset - 30 - w, ystart, "m_main_plaque");
 
         ClientGlobals.re.DrawPic(xoffset - 30 - w, ystart + h + 5, "m_main_logo");
+
+        m_main_xoffset = xoffset;
+        m_main_widest = widest;
+        m_main_ystart = ystart + 13;
+        m_isMainMenu = true;
     }
 
     static keyfunc_t Main_Key = new keyfunc_t() {
@@ -1321,7 +1369,7 @@ public final class Menu extends Key {
         Console.ClearNotify();
 
         ForceMenuOff();
-        ClientGlobals.cls.key_dest = key_console;
+        cls.key_dest = key_console;
     }
 
     private static void UpdateSoundQualityFunc(Object unused) {
@@ -1763,7 +1811,7 @@ public final class Menu extends Key {
         /*
          * * draw the credits
          */
-        for (i = 0, y = (int) (ClientGlobals.viddef.getHeight() - ((ClientGlobals.cls.realtime - credits_start_time) / 40.0F)); credits[i] != null
+        for (i = 0, y = (int) (ClientGlobals.viddef.getHeight() - ((cls.realtime - credits_start_time) / 40.0F)); credits[i] != null
                 && y < ClientGlobals.viddef.getHeight(); y += (Console.CHAR_SIZE_PX + 2), i++) {
             int j, stringoffset = 0;
             boolean bold = false;
@@ -1794,7 +1842,7 @@ public final class Menu extends Key {
         }
 
         if (y < 0)
-            credits_start_time = ClientGlobals.cls.realtime;
+            credits_start_time = cls.realtime;
     }
 
     private static String Credits_Key(int key) {
@@ -1840,7 +1888,7 @@ public final class Menu extends Key {
 
         }
 
-        credits_start_time = ClientGlobals.cls.realtime;
+        credits_start_time = cls.realtime;
         PushMenu((List<String> args) -> Credits_MenuDraw(), new keyfunc_t() {
             public String execute(int key) {
                 return Credits_Key(key);
@@ -1886,7 +1934,7 @@ public final class Menu extends Key {
         Cvar.getInstance().SetValue("gamerules", 0); //PGM
 
         Cbuf.AddText("loading ; killserver ; wait ; newgame\n");
-        ClientGlobals.cls.key_dest = key_game;
+        cls.key_dest = key_game;
     }
 
     private static void EasyGameFunc(Object data) {
@@ -3918,7 +3966,7 @@ public final class Menu extends Key {
         refdef.fov_x = 40;
         refdef.fov_y = Math3D
                 .CalcFov(refdef.fov_x, refdef.width, refdef.height);
-        refdef.time = ClientGlobals.cls.realtime * 0.001f;
+        refdef.time = cls.realtime * 0.001f;
 
         if (s_pmi[s_player_model_box.curvalue].skindisplaynames != null) {
 
@@ -4034,7 +4082,7 @@ public final class Menu extends Key {
 
         case 'Y':
         case 'y':
-            ClientGlobals.cls.key_dest = key_console;
+            cls.key_dest = key_console;
             CL.Quit_f.execute(Collections.emptyList());
             break;
 
@@ -4096,8 +4144,11 @@ public final class Menu extends Key {
      * ================= Draw =================
      */
     static void Draw() {
-        if (ClientGlobals.cls.key_dest != key_menu)
+        if (cls.key_dest != key_menu)
             return;
+
+        m_currentMenu = null;
+        m_isMainMenu = false;
 
         // repaint everything next frame
         SCR.DirtyScreen();
@@ -4117,6 +4168,59 @@ public final class Menu extends Key {
             S.StartLocalSound(menu_in_sound);
             m_entersound = false;
         }
+    }
+
+    static void UpdateMouse() {
+        if (cls.key_dest != key_menu) {
+            prevMouseDown = false;
+            return;
+        }
+
+        int mx = Mouse.getX();
+        int my = ClientGlobals.viddef.getHeight() - Mouse.getY();
+
+        if (m_isMainMenu) {
+            for (int i = 0; i < MAIN_ITEMS; i++) {
+                int itemY = m_main_ystart + i * 40;
+
+                if (mx >= m_main_xoffset - 40 && mx <= m_main_xoffset + m_main_widest + 40
+                        && my >= itemY - 4 && my <= itemY + 30) {
+                    if (m_main_cursor != i) {
+                        m_main_cursor = i;
+                        S.StartLocalSound(menu_move_sound);
+                    }
+                    break;
+                }
+            }
+        }
+        else if (m_currentMenu != null) {
+            menuframework_s menu = m_currentMenu;
+            for (int i = 0; i < menu.nitems; i++) {
+                menucommon_s item = menu.items[i];
+
+                if (item.type == MTYPE_SEPARATOR)
+                    continue;
+
+                int drawX = menu.x + item.x + LCOLUMN_OFFSET;
+                int drawY = menu.y + item.y;
+
+                if (my >= drawY - 2 && my <= drawY + 10
+                        && mx >= drawX - 150 && mx <= drawX + 200) {
+                    if (menu.cursor != i) {
+                        menu.cursor = i;
+                        S.StartLocalSound(menu_move_sound);
+                    }
+                    break;
+                }
+            }
+        }
+
+
+        boolean down = Mouse.isButtonDown(0);
+        if (down && !prevMouseDown) {
+            Keydown(K_ENTER);
+        }
+        prevMouseDown = down;
     }
 
     /*
@@ -4410,6 +4514,7 @@ public final class Menu extends Key {
         /*
          * * draw contents
          */
+        m_currentMenu = menu;
         for (int i = 0; i < menu.nitems; i++) {
             switch (menu.items[i].type) {
             case MTYPE_FIELD:
