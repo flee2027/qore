@@ -54,4 +54,13 @@ public class GameBaseTest {
         assertSame(se2, result.o);
     }
 
+    @Test
+    public void checkClipVelocityNeedOneResult(){
+        float[] in = {0.0f,0.0f,5.0f};
+        float[] normal = {0.0f,0.0f,1.0f};
+        float[] out = {0.0f,0.0f,0.0f};
+
+        assertEquals(1,GameBase.ClipVelocity(in,normal,out,1));
+    }
+
 }

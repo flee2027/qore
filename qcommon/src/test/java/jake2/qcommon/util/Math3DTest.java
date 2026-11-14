@@ -32,4 +32,32 @@ public class Math3DTest {
         assertEquals(0.0f,Math3D.VectorLength(vec), 0.0001f);
     }
 
+    @Test
+    public void checkDotProductWithSomeVectors(){
+        float[] x = {1.0f,0.0f,0.0f};
+        float[] y = {1.0f,0.0f,0.0f};
+        assertEquals(1.0f,Math3D.DotProduct(x,y), 0.0001f);
+    }
+
+    @Test
+    public void checkDotProductWithPerpendicularSomeVectors(){
+        float[] x = {1.0f,0.0f,0.0f};
+        float[] y = {0.0f,1.0f,0.0f};
+        assertEquals(0.0f,Math3D.DotProduct(x,y), 0.0001f);
+    }
+
+    @Test
+    public void createVectorsAndCheckThereEqualOrNot(){
+        float[] vec1 = {1.0f,2.0f,3.0f};
+        float[] vec2 = {1.0f,2.0f,3.0f};
+        assertEquals(true, Math3D.VectorEquals(vec1,vec2));
+    }
+
+    @Test
+    public void createVectorsAndCheckThereEqualOrNotButThereActuallyNotEqual(){
+        float[] vec1 = {1.0f,2.0f,3.0f};
+        float[] vec2 = {1.0f,2.0f,5.0f};
+        assertEquals(false, Math3D.VectorEquals(vec1,vec2));
+    }
+
 }
