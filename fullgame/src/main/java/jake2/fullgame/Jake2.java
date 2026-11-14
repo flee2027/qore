@@ -209,7 +209,7 @@ public final class Jake2 {
                 SCR.EndLoadingPlaque();
             }
 
-            Com.Printf("====== Quake2 Initialized ======\n\n");
+            Com.Printf("====== qore Initialized ======\n\n");
 
             // save config when configuration is completed
             CL.WriteConfiguration();
