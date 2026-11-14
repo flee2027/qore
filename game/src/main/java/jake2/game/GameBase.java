@@ -238,5 +238,5 @@ public class GameBase {
     };
 
     //теперь с верхним регистром найдется сущность, в оригинале только с нижним. имейте ввиду.
-    static final BiPredicate<SubgameEntity, String> findByClassName = (e, className) -> e.classname != null && e.classname.equalsIgnoreCase(className);
+    public static final BiPredicate<SubgameEntity, String> findByClassName = (e, className) -> e.classname != null && e.classname.equalsIgnoreCase(className);
 }
