@@ -1265,6 +1265,7 @@ public final class SCR extends Globals {
 
                 DrawPause();
                 DrawConsole();
+                Menu.UpdateMouse();
                 Menu.Draw();
                 DrawLoading();
             }
@@ -1392,7 +1393,7 @@ public final class SCR extends Globals {
 
         Console.DrawString(ClientGlobals.viddef.getWidth() - text_width - 8, ClientGlobals.viddef.getHeight() - Console.CHAR_SIZE_PX - 8, text);
     }
-
+    
     /*
      * =================================================================
      * 
