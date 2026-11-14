@@ -1,15 +1,14 @@
-package jake2.game;
+package jake2.game.flee;
 
-import jake2.qcommon.Com;
+import jake2.game.GameExportsImpl;
 import jake2.qcommon.GameImports;
 import jake2.qcommon.edict_t;
 
 import java.util.List;
-import java.util.Locale;
 
 import static jake2.qcommon.Defines.PRINT_HIGH;
 
-public class FleeGameExports extends GameExportsImpl{
+public class FleeGameExports extends GameExportsImpl {
     public FleeGameExports(GameImports imports) {
         super(imports);
         System.out.println("flee started!");
