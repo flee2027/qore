@@ -107,6 +107,8 @@ public final class SCR extends Globals {
 
     private static cvar_t fps = new cvar_t();
 
+    private static cvar_t scr_showpos;
+
     private static dirty_t scr_dirty = new dirty_t();
 
     private static dirty_t[] scr_old_dirty = { new dirty_t(), new dirty_t() };
@@ -440,6 +442,7 @@ public final class SCR extends Globals {
         scr_graphshift = Cvar.getInstance().Get("graphshift", "0", 0);
         scr_drawall = Cvar.getInstance().Get("scr_drawall", "1", 0);
         fps = Cvar.getInstance().Get("fps", "0", 0);
+        scr_showpos = Cvar.getInstance().Get("scr_showpos", "0", CVAR_ARCHIVE);
 
         //
         // register our commands
@@ -449,6 +452,7 @@ public final class SCR extends Globals {
         Cmd.AddCommand("sizeup", (List<String> args) -> SizeUp_f());
         Cmd.AddCommand("sizedown", (List<String> args) -> SizeDown_f());
         Cmd.AddCommand("sky", SCR::Sky_f);
+        Cmd.AddCommand("showpos", SCR::ShowPos_f);
 
         scr_initialized = true;
     }
@@ -1250,6 +1254,7 @@ public final class SCR extends Globals {
                 DrawNet();
                 CheckDrawCenterString();
                 DrawFPS();
+                DrawPosition();
 
 
                 if (scr_timegraph.value > 0f)
@@ -1340,6 +1345,54 @@ public final class SCR extends Globals {
         }
     }
 
+    /*
+     * ============== SCR_ShowPos_f ==============
+     *
+     * Toggles the position display. Usage:
+     *   showpos       - toggle
+     *   showpos 0|1   - set explicitly
+     */
+    private static void ShowPos_f(List<String> args) {
+        if (args.size() < 2) {
+            // toggle: нет аргумента — переключаем
+            float newValue = scr_showpos.value == 0f ? 1f : 0f;
+            Cvar.getInstance().SetValue("scr_showpos", newValue);
+        } else {
+            try {
+                float value = Float.parseFloat(args.get(1));
+                Cvar.getInstance().SetValue("scr_showpos", value != 0f ? 1f : 0f);
+            } catch (NumberFormatException e) {
+                Com.Printf("usage: showpos [0|1]\n");
+                return;
+            }
+        }
+        Com.Printf("showpos " + (scr_showpos.value != 0f ? "ON" : "OFF") + "\n");
+    }
+    /*
+     * ============== SCR_DrawPosition ==============
+     *
+     * Draws the player's position in the top-left corner
+     * when showpos is enabled.
+     *
+     * Origin is stored in 1/8 unit fixed-point (see pmove_state_t),
+     * so divide by 8 to convert to world units.
+     */
+    private static void DrawPosition() {
+        if (scr_showpos.value == 0f) return;
+
+        short[] o = ClientGlobals.cl.frame.playerstate.pmove.origin;
+        float px = o[0] / 8.0f;
+        float py = o[1] / 8.0f;
+        float pz = o[2] / 8.0f;
+
+        String text = String.format(java.util.Locale.ROOT,
+                "x=%.1f y=%.1f z=%.1f", px, py, pz);
+
+        int text_width = text.length() * Console.CHAR_SIZE_PX;
+
+        Console.DrawString(ClientGlobals.viddef.getWidth() - text_width - 8, ClientGlobals.viddef.getHeight() - Console.CHAR_SIZE_PX - 8, text);
+    }
+    
     /*
      * =================================================================
      * 

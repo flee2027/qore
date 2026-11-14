@@ -1543,6 +1543,7 @@ public final class CL {
 
         FS.ExecAutoexec();
         Cbuf.Execute();
+        Cmd.ExecuteString("menu_main");
     }
 
     /**
