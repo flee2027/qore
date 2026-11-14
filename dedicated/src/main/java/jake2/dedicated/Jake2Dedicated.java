@@ -79,7 +79,7 @@ public class Jake2Dedicated {
                 Cbuf.Execute();
             }
 
-            Com.Printf("====== Quake2 Initialized ======\n\n");
+            Com.Printf("====== qore Initialized ======\n\n");
 
             // save config when configuration is completed
 
