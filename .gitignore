@@ -1,4 +1,8 @@
 build
+builds
+maps
+ericw_tools
+tools/paths.properties
 /baseq2
 .DS_Store
 .idea

@@ -1139,12 +1139,7 @@ public final class CL {
             CL.precache_check = TEXTURE_CNT;
         }
 
-        if (CL.precache_check == TEXTURE_CNT) {
-            CL.precache_check = TEXTURE_CNT + 1;
-            CL.precache_tex = 0;
-        }
-
-        // confirm existance of textures, download any that don't exist
+        // confirm existence of textures, download any that don't exist
         if (CL.precache_check == TEXTURE_CNT + 1) {
             // from qcommon/cmodel.c
             // extern int numtexinfo;
@@ -1154,15 +1149,30 @@ public final class CL {
                     && allowDownloadMaps.value != 0) {
                 while (CL.precache_tex < ClientGlobals.cm.numtexinfo) {
 
-                    fn = "textures/" + ClientGlobals.cm.map_surfaces[CL.precache_tex++].rname
-                            + ".wal";
-                    if (!CL_parse.CheckOrDownloadFile(fn))
+                    String rname = ClientGlobals.cm.map_surfaces[CL.precache_tex].rname;
+                    CL.precache_tex++;
+
+                    // Some map compilers store rname with the ".wal" extension.
+                    // Strip it so the base path is always "textures/foo/bar".
+                    String base;
+                    if (rname.toLowerCase().endsWith(".wal")) {
+                        base = "textures/" + rname.substring(0, rname.length() - 4);
+                    } else {
+                        base = "textures/" + rname;
+                    }
+
+                    // PNG override: if a .png exists anywhere in the search path
+                    // GL_FindImage will pick up the PNG at render time.
+                    if (FS.FileExists(base + ".png")) {
+                        continue;
+                    }
+
+                    if (!CL_parse.CheckOrDownloadFile(base + ".wal"))
                         return; // started a download
                 }
             }
             CL.precache_check = TEXTURE_CNT + 999;
         }
-
         //	  ZOID
         CL_parse.RegisterSounds();
         CL_view.PrepRefresh();
