@@ -641,6 +641,7 @@ public final class CL {
         S.StopAllSounds();
         CL_fx.ClearEffects();
         CL_tent.ClearTEnts();
+        ParticleSystem.clear();
 
         // wipe the entire cl structure
 
@@ -1467,6 +1468,8 @@ public final class CL {
             if (ClientGlobals.cl.cinematictime == 0) System.gc();
         }
 
+        ParticleSystem.update(ClientGlobals.cls.frametime);
+
         SCR.UpdateScreen();
 
         // update audio
@@ -1536,6 +1539,7 @@ public final class CL {
 
         SCR.Init();
         //Globals.cls.disable_screen = 1.0f; // don't draw yet
+        ParticleSystem.Init();
 
         CDAudio.Init();
         InitLocal();
