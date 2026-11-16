@@ -38,6 +38,7 @@ import jake2.qcommon.filesystem.qfiles;
 import jake2.qcommon.network.messages.client.StringCmdMessage;
 import jake2.qcommon.sys.Timer;
 import jake2.qcommon.util.Vargs;
+import org.lwjgl.opengl.GL11;
 
 import java.awt.*;
 import java.nio.ByteBuffer;
@@ -845,6 +846,38 @@ public final class SCR extends Globals {
     }
 
     /*
+     * ================
+     * SCR_DrawFlashlightVignette
+     *
+     * Draws a radial gradient overlay to simulate a flashlight cone effect.
+     * Forces GL_BLEND to ensure smooth alpha transparency, regardless of
+     * the internal DrawStretchPic implementation.
+     * ================
+     */
+    static void DrawFlashlightVignette() {
+        if (ClientGlobals.cl_enable_flashlight.value == 0.0f && ClientGlobals.cl_flashlight.value == 0.0f)
+            return;
+
+        if (vignette_pic == null || vignette_pic.length() == 0)
+            return;
+
+        GL11.glPushAttrib(GL11.GL_COLOR_BUFFER_BIT);
+
+        GL11.glEnable(GL11.GL_BLEND);
+        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+
+        ClientGlobals.re.DrawStretchPic(
+                ClientGlobals.scr_vrect.x,
+                ClientGlobals.scr_vrect.y,
+                ClientGlobals.scr_vrect.width,
+                ClientGlobals.scr_vrect.height,
+                vignette_pic
+        );
+
+        GL11.glPopAttrib();
+    }
+
+    /*
      * =============== SCR_TouchPics
      * 
      * Allows rendering code to cache all needed sbar graphics ===============
@@ -870,7 +903,7 @@ public final class SCR extends Globals {
         }
 
         if (ClientGlobals.cl_enable_flashlight.value != 0.0f && ClientGlobals.cl_flashlight.value != 0.0f){
-            vignette_pic = ClientGlobals.re.RegisterPic("")
+            ClientGlobals.re.RegisterPic(vignette_pic);
         }
     }
 

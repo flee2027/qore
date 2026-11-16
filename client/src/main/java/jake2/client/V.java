@@ -422,6 +422,8 @@ public final class V extends Globals {
             //Arrays.sort(cl.refdef.entities, entitycmpfnc);
         }
 
+        SCR.DrawFlashlightVignette();
+
         ClientGlobals.re.RenderFrame(ClientGlobals.cl.refdef);
         
         // CDawg 
