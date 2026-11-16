@@ -121,4 +121,11 @@ public class ClientGlobals {
     static cvar_t cl_timeout;
     static cvar_t cl_upspeed;
     static cvar_t cl_yawspeed;
+
+    //
+    // A custom functions
+    //
+
+    static cvar_t cl_enable_flashlight;
+    static cvar_t cl_flashlight;
 }

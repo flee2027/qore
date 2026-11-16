@@ -1283,6 +1283,12 @@ public final class CL {
         ClientGlobals.cl_vwep = Cvar.getInstance().Get("cl_vwep", "1", Defines.CVAR_ARCHIVE);
 
         //
+        // A custom functions
+        //
+        ClientGlobals.cl_enable_flashlight = Cvar.getInstance().Get("enable_flashlight", "1", 0);
+        ClientGlobals.cl_flashlight = Cvar.getInstance().Get("flashlight", "0", 0);
+
+        //
         // register our commands
         //
         Cmd.AddCommand("cmd", ForwardToServer_f);
@@ -1487,10 +1493,20 @@ public final class CL {
                 ClientGlobals.cl.v_right, ClientGlobals.cl.v_up);
         
         CDAudio.Update(); //sfranzyshen
-        
+
+        if (ClientGlobals.cl_flashlight.value != 0.0f){
+            //хак ибо нехер выстрелам и монстрам выебываться! :D
+            CL_fx.cdlight_t dl = CL_fx.AllocDlight(-999);
+            Math3D.VectorCopy(ClientGlobals.cl.refdef.vieworg, dl.origin);
+            dl.color[0] = 1.0f; dl.color[1] = 0.9f; dl.color[2] = 0.7f;
+            dl.radius = 250.0f;
+            dl.die = ClientGlobals.cl.time + 100.0f;
+        }
+
         // advance local effects for next frame
         CL_fx.RunDLights();
         CL_fx.RunLightStyles();
+
         SCR.RunCinematic();
         SCR.RunConsole();
 
