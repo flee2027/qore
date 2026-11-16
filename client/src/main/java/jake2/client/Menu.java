@@ -72,6 +72,8 @@ public final class Menu extends Key {
 
     private static final int NUM_CURSOR_FRAMES = 15;
 
+    private static final int MAIN_ITEMS = 5;
+
     private static final String menu_in_sound = "misc/menu1.wav";
 
     private static final String menu_move_sound = "misc/menu2.wav";
@@ -101,6 +103,10 @@ public final class Menu extends Key {
         keyfunc_t key;
     }
 
+    private static long lastHoverSoundTime = 0;
+
+    private static int[] m_main_widths = new int[MAIN_ITEMS];
+
     private static int getMouseX() {
         return Mouse.getX();
     }
@@ -125,19 +131,6 @@ public final class Menu extends Key {
         //void (*cursordraw)( struct _tag_menuframework *m );
         mcallback cursordraw;
 
-    }
-
-    private static int getItemUnderMouse(menuframework_s menu) {
-        int mx = getMouseX();
-        int my = getMouseY();
-        for (int i = 0; i < menu.nitems; i++) {
-            menucommon_s item = menu.items[i];
-            if (mx >= item.x && mx <= item.x + 200 &&
-                    my >= item.y && my <= item.y + 40) {
-                return i;
-            }
-        }
-        return -1;
     }
 
     abstract static class mcallback {
@@ -456,7 +449,6 @@ public final class Menu extends Key {
      * 
      * =======================================================================
      */
-    private static final int MAIN_ITEMS = 5;
 
     static Command Main_Draw = (List<String> args) -> Main_Draw();
 
@@ -475,6 +467,7 @@ public final class Menu extends Key {
         for (i = 0; i < names.length; i++) {
             ClientGlobals.re.DrawGetPicSize(dim, names[i]);
             w = dim.width;
+            m_main_widths[i] = w;
             h = dim.height;
 
             if (w > widest)
@@ -4150,6 +4143,7 @@ public final class Menu extends Key {
         m_currentMenu = null;
         m_isMainMenu = false;
 
+
         // repaint everything next frame
         SCR.DirtyScreen();
 
@@ -4171,6 +4165,10 @@ public final class Menu extends Key {
     }
 
     static void UpdateMouse() {
+        long now = System.currentTimeMillis();
+        if (lastHoverSoundTime >= 50){
+            lastHoverSoundTime = 50;
+        }
         if (cls.key_dest != key_menu) {
             prevMouseDown = false;
             return;
@@ -4183,11 +4181,14 @@ public final class Menu extends Key {
             for (int i = 0; i < MAIN_ITEMS; i++) {
                 int itemY = m_main_ystart + i * 40;
 
-                if (mx >= m_main_xoffset - 40 && mx <= m_main_xoffset + m_main_widest + 40
+                if (mx >= m_main_xoffset - 40 && mx <= m_main_xoffset + m_main_widths[i] + 40
                         && my >= itemY - 4 && my <= itemY + 30) {
                     if (m_main_cursor != i) {
                         m_main_cursor = i;
-                        S.StartLocalSound(menu_move_sound);
+                        if (now - lastHoverSoundTime > 50) {
+                            S.StartLocalSound(menu_move_sound);
+                            lastHoverSoundTime = now;
+                        }
                     }
                     break;
                 }
@@ -4208,7 +4209,10 @@ public final class Menu extends Key {
                         && mx >= drawX - 150 && mx <= drawX + 200) {
                     if (menu.cursor != i) {
                         menu.cursor = i;
-                        S.StartLocalSound(menu_move_sound);
+                        if (now - lastHoverSoundTime > 50) {
+                            S.StartLocalSound(menu_move_sound);
+                            lastHoverSoundTime = now;
+                        }
                     }
                     break;
                 }

@@ -25,6 +25,7 @@
  */
 package jake2.client;
 
+import jake2.client.particles.ParticleEffects;
 import jake2.client.render.model_t;
 import jake2.client.sound.S;
 import jake2.client.sound.sfx_t;
@@ -748,6 +749,7 @@ public class CL_tent {
             switch (m.style) {
                 case TE_BLOOD:
                     CL_fx.ParticleEffect(m.position, m.direction, 0xe8, 60);
+                    ParticleEffects.blood(m.position);
                     break;
                 case TE_GUNSHOT:
                 case TE_SPARKS:
@@ -770,6 +772,10 @@ public class CL_tent {
                             S.StartSound(m.position, 0, 0, cl_sfx_ric3, 1, Defines.ATTN_NORM,0);
                     }
 
+                    if (m.style == Defines.TE_GUNSHOT || m.style == Defines.TE_BULLET_SPARKS) {
+                        ParticleEffects.sparks(m.position);
+                    }
+
                     break;
                 case TE_SCREEN_SPARKS:
                 case TE_SHIELD_SPARKS:
@@ -777,6 +783,7 @@ public class CL_tent {
                         CL_fx.ParticleEffect(m.position, m.direction, 0xd0, 40);
                     else
                         CL_fx.ParticleEffect(m.position, m.direction, 0xb0, 40);
+                    ParticleEffects.sparks(m.position);
                     //FIXME : replace or remove this sound
                     S.StartSound(m.position, 0, 0, cl_sfx_lashit, 1, Defines.ATTN_NORM, 0);
                     break;
@@ -787,6 +794,7 @@ public class CL_tent {
                     break;
                 case TE_BLASTER:
                     CL_fx.BlasterParticles(m.position, m.direction);
+                    ParticleEffects.blasterTrail(m.position);
                     explosion_t ex = AllocExplosion();
                     Math3D.VectorCopy(m.position, ex.ent.origin);
                     ex.ent.angles[0] = (float) (Math.acos(m.direction[2]) / Math.PI * 180);
@@ -812,6 +820,7 @@ public class CL_tent {
                     break;
                 case TE_GREENBLOOD:
                     CL_fx.ParticleEffect2(m.position, m.direction, 0xdf, 30);
+                    ParticleEffects.greenBlood(m.position);
                     break;
 
                 case TE_BLASTER2:
@@ -821,6 +830,8 @@ public class CL_tent {
                         CL_newfx.BlasterParticles2(m.position, m.direction, 0xd0);
                     else
                         CL_newfx.BlasterParticles2(m.position, m.direction, 0x6f); // 75
+
+                    ParticleEffects.blasterTrail(m.position);
 
                     explosion_t ex1 = AllocExplosion();
                     Math3D.VectorCopy(m.position, ex1.ent.origin);
@@ -869,13 +880,16 @@ public class CL_tent {
 
                 case TE_HEATBEAM_STEAM:
                     CL_newfx.ParticleSteamEffect(m.position, m.direction, 0xe0, 20, 60);
+                    ParticleEffects.smoke(m.position);
                     S.StartSound(m.position, 0, 0, cl_sfx_lashit, 1, Defines.ATTN_NORM, 0);
                     break;
                 case TE_MOREBLOOD:
                     CL_fx.ParticleEffect(m.position, m.direction, 0xe8, 250);
+                    ParticleEffects.blood(m.position);
                     break;
                 case TE_ELECTRIC_SPARKS:
                     CL_fx.ParticleEffect(m.position, m.direction, 0x75, 40);
+                    ParticleEffects.sparks(m.position);
                     //FIXME : replace or remove this sound
                     S.StartSound(m.position, 0, 0, cl_sfx_lashit, 1, Defines.ATTN_NORM, 0);
                     break;
@@ -888,6 +902,8 @@ public class CL_tent {
                     break;
                 case TE_RAILTRAIL:
                     CL_fx.RailTrail(m.position, m.destination);
+                    ParticleEffects.railTrail(m.position);
+                    ParticleEffects.railTrail(m.destination);
                     S.StartSound(m.destination, 0, 0, cl_sfx_railg, 1, Defines.ATTN_NORM, 0);
                     break;
                 case TE_BLUEHYPERBLASTER:
@@ -911,6 +927,7 @@ public class CL_tent {
                     else
                         color = splash_color[m.param];
                     CL_fx.ParticleEffect(m.position, m.direction, color, m.count);
+                    ParticleEffects.waterSplash(m.position);
 
                     if (m.param == Defines.SPLASH_SPARKS) {
                         int r = Lib.rand() & 3;
@@ -965,6 +982,7 @@ public class CL_tent {
                     ex.baseframe = 30;
                     ex.ent.angles[1] = Lib.rand() % 360;
                     CL_fx.ExplosionParticles(m.position);
+                    ParticleEffects.explosion(m.position);
                     if (m.style == Defines.TE_GRENADE_EXPLOSION_WATER)
                         S.StartSound(m.position, 0, 0, cl_sfx_watrexp, 1, Defines.ATTN_NORM, 0);
                     else
@@ -986,6 +1004,7 @@ public class CL_tent {
                         plasma.baseframe = 15;
                     plasma.frames = 15;
                     CL_fx.ExplosionParticles(m.position);
+                    ParticleEffects.explosion(m.position);
                     S.StartSound(m.position, 0, 0, cl_sfx_rockexp, 1, Defines.ATTN_NORM, 0);
                     break;
 
@@ -1014,10 +1033,12 @@ public class CL_tent {
                     ex1.frames = 15;
                     if (m.style != Defines.TE_EXPLOSION1_BIG && m.style != Defines.TE_EXPLOSION1_NP) // PMM
                         CL_fx.ExplosionParticles(m.position); // PMM
-                    if (m.style == Defines.TE_ROCKET_EXPLOSION_WATER)
+                    ParticleEffects.explosion(m.position);
+                    if (m.style == Defines.TE_ROCKET_EXPLOSION_WATER) {
                         S.StartSound(m.position, 0, 0, cl_sfx_watrexp, 1, Defines.ATTN_NORM, 0);
-                    else
-                        S.StartSound(m.position, 0, 0, cl_sfx_rockexp, 1, Defines.ATTN_NORM, 0);
+                        ParticleEffects.waterSplash(m.position);
+                    }
+                    else S.StartSound(m.position, 0, 0, cl_sfx_rockexp, 1, Defines.ATTN_NORM, 0);
                     break;
 
                 case TE_BFG_EXPLOSION:
@@ -1034,10 +1055,12 @@ public class CL_tent {
                     bfg.ent.flags |= Defines.RF_TRANSLUCENT;
                     bfg.ent.alpha = 0.30f;
                     bfg.frames = 4;
+                    ParticleEffects.bfgExplosion(m.position);
                     break;
 
                 case TE_BFG_BIGEXPLOSION:
                     CL_fx.BFGExplosionParticles(m.position);
+                    ParticleEffects.bfgExplosion(m.position);
                     break;
                 case TE_BOSSTPORT:
                     CL_fx.BigTeleportParticles(m.position);
@@ -1068,6 +1091,7 @@ public class CL_tent {
 
                 case TE_CHAINFIST_SMOKE:
                     CL_newfx.ParticleSmokeEffect(m.position, new float[]{0, 0, 1}, 0, 20, 20);
+                    ParticleEffects.smoke(m.position);
                     break;
 
                 case TE_TRACKER_EXPLOSION:
@@ -1079,6 +1103,7 @@ public class CL_tent {
                 case TE_TELEPORT_EFFECT:
                 case TE_DBALL_GOAL:
                     CL_fx.TeleportParticles(m.position);
+                    ParticleEffects.teleport(m.position);
                     break;
 
                 case TE_WIDOWSPLASH:
@@ -1653,4 +1678,6 @@ public class CL_tent {
         // PMM - set up sustain
         ProcessSustain();
     }
+
+
 }

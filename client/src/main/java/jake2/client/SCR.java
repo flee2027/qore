@@ -24,6 +24,7 @@
 
 package jake2.client;
 
+import jake2.client.particles.ParticleEffects;
 import jake2.client.sound.S;
 import jake2.qcommon.Com;
 import jake2.qcommon.Defines;
@@ -45,6 +46,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static jake2.client.ClientGlobals.cls;
+import static jake2.client.ClientGlobals.viddef;
 
 /**
  * SCR
@@ -441,7 +443,7 @@ public final class SCR extends Globals {
         scr_graphscale = Cvar.getInstance().Get("graphscale", "1", 0);
         scr_graphshift = Cvar.getInstance().Get("graphshift", "0", 0);
         scr_drawall = Cvar.getInstance().Get("scr_drawall", "1", 0);
-        fps = Cvar.getInstance().Get("fps", "0", 0);
+        fps = Cvar.getInstance().Get("fps", "0", CVAR_ARCHIVE);
         scr_showpos = Cvar.getInstance().Get("scr_showpos", "0", CVAR_ARCHIVE);
 
         //
@@ -453,6 +455,8 @@ public final class SCR extends Globals {
         Cmd.AddCommand("sizedown", (List<String> args) -> SizeDown_f());
         Cmd.AddCommand("sky", SCR::Sky_f);
         Cmd.AddCommand("showpos", SCR::ShowPos_f);
+        Cmd.AddCommand("testparticles", SCR::TestParticles_f);
+        Cmd.AddCommand("testfx", SCR::TestFx_f);
 
         scr_initialized = true;
     }
@@ -1335,14 +1339,55 @@ public final class SCR extends Globals {
                 lastframes = cls.framecount;
                 lasttime = cls.realtime;
             }
-            int x = ClientGlobals.viddef.getWidth() - Console.CHAR_SIZE_PX * fpsvalue.length() - 2;
+            int x = Console.CHAR_SIZE_PX * fpsvalue.length() - 2;
+            int y = viddef.getHeight() - Console.CHAR_SIZE_PX - 8;
             for (int i = 0; i < fpsvalue.length(); i++) {
-                ClientGlobals.re.DrawChar(x, 2, fpsvalue.charAt(i));
+                ClientGlobals.re.DrawChar(x, y, fpsvalue.charAt(i));
                 x += Console.CHAR_SIZE_PX;
             }
         } else if (fps.modified) {
             fps.modified = false;
             Cvar.getInstance().SetValue("cl_maxfps", 90);
+        }
+    }
+
+    /*
+     * ============== SCR_TestParticles_f ==============
+     *
+     * Debug command: spawns a burst of 100 particles in front of the player.
+     * Usage: testparticles
+     */
+    private static void TestParticles_f(List<String> args) {
+        short[] o = ClientGlobals.cl.frame.playerstate.pmove.origin;
+        float x = o[0] / 8.0f;
+        float y = o[1] / 8.0f;
+        float z = o[2] / 8.0f + 40.0f;  // 40 units above the player's origin
+
+        ParticleEffects.spawnBurst(x, y, z, 100, 300f, 0.5f, 1.5f, 0xFF8800, 4f);
+        Com.Printf(String.format("Spawned 100 particles at (%.1f, %.1f, %.1f)\n", x, y, z));
+    }
+
+    private static void TestFx_f(List<String> args) {
+        if (args.size() < 2) {
+            Com.Printf("usage: testfx <name> (explosion|bfg|blood|greenblood|sparks|smoke|water|electric|blaster|rail|teleport)\n");
+            return;
+        }
+        short[] o = ClientGlobals.cl.frame.playerstate.pmove.origin;
+        float[] pos = { o[0] / 8.0f, o[1] / 8.0f, o[2] / 8.0f + 40.0f };
+
+        switch (args.get(1).toLowerCase()) {
+            case "explosion":  ParticleEffects.explosion(pos); break;
+            case "bfg":        ParticleEffects.bfgExplosion(pos); break;
+            case "blood":      ParticleEffects.blood(pos); break;
+            case "greenblood": ParticleEffects.greenBlood(pos); break;
+            case "sparks":     ParticleEffects.sparks(pos); break;
+            case "smoke":      ParticleEffects.smoke(pos); break;
+            case "water":      ParticleEffects.waterSplash(pos); break;
+            case "electric":   ParticleEffects.electricSparks(pos); break;
+            case "blaster":    ParticleEffects.blasterTrail(pos); break;
+            case "rail":       ParticleEffects.railTrail(pos); break;
+            case "teleport":   ParticleEffects.teleport(pos); break;
+            default: Com.Printf("unknown effect: " + args.get(1) + "\n");
         }
     }
 
@@ -1355,7 +1400,6 @@ public final class SCR extends Globals {
      */
     private static void ShowPos_f(List<String> args) {
         if (args.size() < 2) {
-            // toggle: нет аргумента — переключаем
             float newValue = scr_showpos.value == 0f ? 1f : 0f;
             Cvar.getInstance().SetValue("scr_showpos", newValue);
         } else {

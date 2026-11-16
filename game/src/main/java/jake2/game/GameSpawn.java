@@ -558,6 +558,51 @@ public class GameSpawn {
         spawns.put("turret_base", TurretKt::turretBase);
 
         spawns.put("turret_driver", TurretKt::turretDriver);
+
+        spawns.put("func_model", GameSpawn::funcModel);
+    }
+
+    /**
+     * func_model — renders an external MD2 model at the entity's origin.
+     *
+     * Keys:
+     *   "model"  — path to the .md2 file (required). Example: "models/objects/lamp/tris.md2"
+     *   "angles" — pitch yaw roll (parsed by ED_ParseField into ent.s.angles)
+     *
+     * Spawnflags:
+     *   32 (bit 5) — SOLID_OFF: forces SOLID_NOT even if collision is otherwise on.
+     *
+     * Behavior:
+     *   - Default: SOLID_BBOX — collidable. Bounds are taken from the MD2 file header
+     *     (minedge/maxedge), so the model is wrapped in a box automatically.
+     *   - With spawnflag 32: SOLID_NOT — purely decorative, no collision.
+     *
+     * The model is drawn by the client via the alias-model renderer, driven by
+     * ent.s.modelindex set inside gi.setmodel().
+     */
+    static void funcModel(SubgameEntity ent, GameExportsImpl game) {
+        if (ent.model == null || ent.model.isEmpty()) {
+            game.gameImports.dprintf("func_model: missing 'model' key at "
+                    + Lib.vtofs(ent.s.origin) + "\n");
+            game.freeEntity(ent);
+            return;
+        }
+
+        // Load the model, set s.modelindex, and copy MD2 bounds into ent.mins/maxs.
+        game.gameImports.setmodel(ent, ent.model);
+
+        // Static: no movement, no physics simulation.
+        ent.movetype = GameDefines.MOVETYPE_NONE;
+
+        // Solidity: spawnflag 32 overrides to non-solid (decorative).
+        if ((ent.spawnflags & 32) != 0) {
+            ent.solid = Defines.SOLID_NOT;
+        } else {
+            ent.solid = Defines.SOLID_BBOX;
+        }
+
+        // Register for rendering + collision. Without this the entity is invisible.
+        game.gameImports.linkentity(ent);
     }
 
     /**

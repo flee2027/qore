@@ -1,6 +1,9 @@
 ### *this is fork of jake2 for my purposes. like java studiyng, making my custom in-house engine for my games and etc. also, i use ai for references and adding new functions. i need to mention that, because people. be free to fork, but there is no interesting here yet.*
 ### *also here a original - [https://github.com/demoth/jake2](https://github.com/demoth/jake2)*
 
+### now with png support!
+![test_png.png](info/screenshots/test_png.png)
+
 Jake2 README
 ============
 

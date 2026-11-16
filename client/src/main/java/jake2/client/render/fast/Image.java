@@ -1463,6 +1463,29 @@ public abstract class Image extends Main {
             return image;
         }
 
+		if (type == it_wall || type == it_sprite || type == it_pic || type == it_skin) {
+			String pngName;
+			if (name.endsWith(".png")) {
+				pngName = name;
+			} else if (name.endsWith(".wal") || name.endsWith(".pcx") || name.endsWith(".tga")) {
+				pngName = name.substring(0, name.length() - 4) + ".png";
+			} else if (type == it_pic) {
+				pngName = "pics/" + name + ".png";
+			} else {
+				pngName = name + ".png";
+			}
+
+			if (pngName != null) {
+				jake2.qcommon.imageio.PNGImageLoader.Result png =
+						jake2.qcommon.imageio.PNGImageLoader.load(pngName);
+				if (png != null) {
+					image = GL_LoadPic(name, png.rgba, png.width, png.height, type, 32);
+					imageCache.put(image.name, image);
+					return image;
+				}
+			}
+		}
+
 		//
 		// load the pic from disk
 		//
