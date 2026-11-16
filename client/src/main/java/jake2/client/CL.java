@@ -52,6 +52,7 @@ import java.nio.ByteOrder;
 import java.util.Collections;
 import java.util.List;
 
+import static jake2.qcommon.Defines.MASK_SOLID;
 import static jake2.qcommon.Defines.NS_CLIENT;
 import static jake2.qcommon.exec.Cmd.getArguments;
 
@@ -371,7 +372,7 @@ public final class CL {
             }
             to = netadr_t.fromString(ClientGlobals.rcon_address.string, Defines.PORT_SERVER);
         }
-        Netchan.sendConnectionlessPacket(Defines.NS_CLIENT, to, ConnectionlessCommand.rcon, message.toString());
+        Netchan.sendConnectionlessPacket(NS_CLIENT, to, ConnectionlessCommand.rcon, message.toString());
     };
 
     private static Command Disconnect_f = (List<String> args) -> Com.Error(Defines.ERR_DROP, "Disconnected from server");
@@ -589,7 +590,7 @@ public final class CL {
         int port = (int) Cvar.getInstance().VariableValue("qport");
         Globals.userinfo_modified = false;
 
-        Netchan.sendConnectionlessPacket(Defines.NS_CLIENT, adr, ConnectionlessCommand.connect,
+        Netchan.sendConnectionlessPacket(NS_CLIENT, adr, ConnectionlessCommand.connect,
                 " " + Defines.PROTOCOL_VERSION + " " + port + " "
                 + ClientGlobals.cls.challenge + " \"" + Cvar.getInstance().Userinfo() + "\"\n");
     }
@@ -630,7 +631,7 @@ public final class CL {
 
         Com.Printf("Connecting to " + ClientGlobals.cls.servername + "...\n");
 
-        Netchan.sendConnectionlessPacket(Defines.NS_CLIENT, adr, ConnectionlessCommand.getchallenge, "\n");
+        Netchan.sendConnectionlessPacket(NS_CLIENT, adr, ConnectionlessCommand.getchallenge, "\n");
     }
 
     /**
@@ -741,7 +742,7 @@ public final class CL {
                     Com.Printf("Dup connect received.  Ignored.\n");
                     break;
                 }
-                ClientGlobals.cls.netchan.setup(Defines.NS_CLIENT, packet.from, ClientGlobals.cls.quakePort);
+                ClientGlobals.cls.netchan.setup(NS_CLIENT, packet.from, ClientGlobals.cls.quakePort);
                 ClientGlobals.cls.netchan.reliablePending.add(new StringCmdMessage(StringCmdMessage.NEW));
                 ClientGlobals.cls.state = Defines.ca_connected;
                 break;
@@ -759,7 +760,7 @@ public final class CL {
 
             // ping from somewhere
             case ping:
-                Netchan.sendConnectionlessPacket(Defines.NS_CLIENT, packet.from, ConnectionlessCommand.ack, "");
+                Netchan.sendConnectionlessPacket(NS_CLIENT, packet.from, ConnectionlessCommand.ack, "");
                 break;
 
             // challenge from the server we are connecting to
@@ -1287,6 +1288,7 @@ public final class CL {
         //
         ClientGlobals.cl_enable_flashlight = Cvar.getInstance().Get("enable_flashlight", "1", 0);
         ClientGlobals.cl_flashlight = Cvar.getInstance().Get("flashlight", "0", 0);
+        ClientGlobals.cl_distance_flashlight = Cvar.getInstance().Get("distance_flashlight", "1024", 0);
 
         //
         // register our commands
@@ -1313,6 +1315,9 @@ public final class CL {
         Cmd.AddCommand("precache", Precache_f);
 
         Cmd.AddCommand("download", Download_f);
+
+        Cmd.AddCommand("distance_flashlight", CL::FlashlightDistance_f);
+
 
         //
         // forward to server commands
@@ -1380,7 +1385,7 @@ public final class CL {
      */
     private static void FixCvarCheats() {
         int i;
-        CL.cheatvar_t var;
+        cheatvar_t var;
 
         if ("1".equals(ClientGlobals.cl.configstrings[Defines.CS_MAXCLIENTS])
                 || 0 == ClientGlobals.cl.configstrings[Defines.CS_MAXCLIENTS]
@@ -1407,6 +1412,11 @@ public final class CL {
     }
 
     //	  =============================================================
+
+    private static void FlashlightDistance_f(List<String> args){
+        if (args.size() < 2) return;
+        else ClientGlobals.cl_distance_flashlight.value = Float.parseFloat(args.get(1));
+    }
 
     /**
      * SendCommand
@@ -1494,13 +1504,22 @@ public final class CL {
         
         CDAudio.Update(); //sfranzyshen
 
-        if (ClientGlobals.cl_flashlight.value != 0.0f){
-            //хак ибо нехер выстрелам и монстрам выебываться! :D
-            CL_fx.cdlight_t dl = CL_fx.AllocDlight(-999);
-            Math3D.VectorCopy(ClientGlobals.cl.refdef.vieworg, dl.origin);
-            dl.color[0] = 1.0f; dl.color[1] = 0.9f; dl.color[2] = 0.7f;
-            dl.radius = 250.0f;
-            dl.die = ClientGlobals.cl.time + 100.0f;
+        if (ClientGlobals.cl_enable_flashlight.value != 0.0f && ClientGlobals.cl_flashlight.value != 0.0f){
+            float[] playerHeadPosition = ClientGlobals.cl.refdef.vieworg;
+            float[] destination = new float[3];
+            Math3D.VectorMA(playerHeadPosition, ClientGlobals.cl_distance_flashlight.value, ClientGlobals.cl.v_forward, destination);
+            trace_t tracePosition = ClientGlobals.cm.BoxTrace(playerHeadPosition, destination, Globals.vec3_origin, Globals.vec3_origin, 0, MASK_SOLID);
+            if (tracePosition.fraction < 1.0f) {
+                //хак ибо нехер выстрелам и монстрам выебываться! :D
+                CL_fx.cdlight_t dl = CL_fx.AllocDlight(-999);
+                Math3D.VectorCopy(tracePosition.endpos, dl.origin);
+                dl.color[0] = 1.0f;
+                dl.color[1] = 0.9f;
+                dl.color[2] = 0.7f;
+                dl.radius = 150.0f;
+                dl.die = ClientGlobals.cl.time + 100.0f;
+            }
+
         }
 
         // advance local effects for next frame

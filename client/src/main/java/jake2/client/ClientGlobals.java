@@ -128,4 +128,5 @@ public class ClientGlobals {
 
     static cvar_t cl_enable_flashlight;
     static cvar_t cl_flashlight;
+    static cvar_t cl_distance_flashlight;
 }
