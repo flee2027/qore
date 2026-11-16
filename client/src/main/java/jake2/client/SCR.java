@@ -117,6 +117,8 @@ public final class SCR extends Globals {
 
     private static String crosshair_pic;
 
+    private static String vignette_pic;
+
     private static int crosshair_width, crosshair_height;
 
     static class dirty_t {
@@ -865,6 +867,10 @@ public final class SCR extends Globals {
             crosshair_height = dim.height;
             if (crosshair_width == 0)
                 crosshair_pic = "";
+        }
+
+        if (ClientGlobals.cl_enable_flashlight.value != 0.0f && ClientGlobals.cl_flashlight.value != 0.0f){
+            vignette_pic = ClientGlobals.re.RegisterPic("")
         }
     }
 
