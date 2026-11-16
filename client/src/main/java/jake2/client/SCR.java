@@ -118,7 +118,7 @@ public final class SCR extends Globals {
 
     private static String crosshair_pic;
 
-    private static String vignette_pic;
+    // private static String vignette_pic = "gfx/flashlight_vignette.png";
 
     private static int crosshair_width, crosshair_height;
 
@@ -854,8 +854,9 @@ public final class SCR extends Globals {
      * the internal DrawStretchPic implementation.
      * ================
      */
-    static void DrawFlashlightVignette() {
-        if (ClientGlobals.cl_enable_flashlight.value == 0.0f && ClientGlobals.cl_flashlight.value == 0.0f)
+    @Deprecated
+    static void DrawFlashlightVignette(String vignette_pic) {
+        if (ClientGlobals.cl_enable_flashlight.value == 0.0f || ClientGlobals.cl_flashlight.value == 0.0f)
             return;
 
         if (vignette_pic == null || vignette_pic.length() == 0)
@@ -902,9 +903,8 @@ public final class SCR extends Globals {
                 crosshair_pic = "";
         }
 
-        if (ClientGlobals.cl_enable_flashlight.value != 0.0f && ClientGlobals.cl_flashlight.value != 0.0f){
-            ClientGlobals.re.RegisterPic(vignette_pic);
-        }
+        //ClientGlobals.re.RegisterPic(vignette_pic);
+
     }
 
     private static LayoutParser layoutParser = new LayoutParser();
