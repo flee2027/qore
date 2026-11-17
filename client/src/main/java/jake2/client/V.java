@@ -423,6 +423,8 @@ public final class V extends Globals {
         }
 
         ClientGlobals.re.RenderFrame(ClientGlobals.cl.refdef);
+
+        // SCR.DrawFlashlightVignette();
         
         // CDawg 
         ClientGlobals.cl.mapdef.map_view = (int) ClientGlobals.cl_map.value;

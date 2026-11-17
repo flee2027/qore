@@ -38,6 +38,7 @@ import jake2.qcommon.filesystem.qfiles;
 import jake2.qcommon.network.messages.client.StringCmdMessage;
 import jake2.qcommon.sys.Timer;
 import jake2.qcommon.util.Vargs;
+import org.lwjgl.opengl.GL11;
 
 import java.awt.*;
 import java.nio.ByteBuffer;
@@ -116,6 +117,8 @@ public final class SCR extends Globals {
     private static dirty_t[] scr_old_dirty = { new dirty_t(), new dirty_t() };
 
     private static String crosshair_pic;
+
+    // private static String vignette_pic = "gfx/flashlight_vignette.png";
 
     private static int crosshair_width, crosshair_height;
 
@@ -843,6 +846,39 @@ public final class SCR extends Globals {
     }
 
     /*
+     * ================
+     * SCR_DrawFlashlightVignette
+     *
+     * Draws a radial gradient overlay to simulate a flashlight cone effect.
+     * Forces GL_BLEND to ensure smooth alpha transparency, regardless of
+     * the internal DrawStretchPic implementation.
+     * ================
+     */
+    @Deprecated
+    static void DrawFlashlightVignette(String vignette_pic) {
+        if (ClientGlobals.cl_enable_flashlight.value == 0.0f || ClientGlobals.cl_flashlight.value == 0.0f)
+            return;
+
+        if (vignette_pic == null || vignette_pic.length() == 0)
+            return;
+
+        GL11.glPushAttrib(GL11.GL_COLOR_BUFFER_BIT);
+
+        GL11.glEnable(GL11.GL_BLEND);
+        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+
+        ClientGlobals.re.DrawStretchPic(
+                ClientGlobals.scr_vrect.x,
+                ClientGlobals.scr_vrect.y,
+                ClientGlobals.scr_vrect.width,
+                ClientGlobals.scr_vrect.height,
+                vignette_pic
+        );
+
+        GL11.glPopAttrib();
+    }
+
+    /*
      * =============== SCR_TouchPics
      * 
      * Allows rendering code to cache all needed sbar graphics ===============
@@ -866,6 +902,9 @@ public final class SCR extends Globals {
             if (crosshair_width == 0)
                 crosshair_pic = "";
         }
+
+        //ClientGlobals.re.RegisterPic(vignette_pic);
+
     }
 
     private static LayoutParser layoutParser = new LayoutParser();

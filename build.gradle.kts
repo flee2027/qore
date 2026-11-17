@@ -36,7 +36,6 @@ allprojects {
 
 val pathsFile = file("$projectDir/tools/paths.properties")
 
-/** Reads a path from paths.properties, or returns null if missing. */
 fun readPath(key: String): String? {
     if (!pathsFile.exists()) return null
     val props = Properties()
@@ -44,25 +43,19 @@ fun readPath(key: String): String? {
     return props.getProperty(key)?.takeIf { it.isNotBlank() }
 }
 
-/** Reads a required path, failing the build with a clear message if unset. */
 fun requirePath(key: String): String =
     readPath(key) ?: error("$key is not configured. Run ./gradlew resetPaths then retry.")
 
-// Shared runtime classpath for :tools (contains PathPrompter, PngToWalConverter, PngValidator).
 val toolsRuntime = project(":tools")
     .extensions.getByType(org.gradle.api.tasks.SourceSetContainer::class.java)
     .getByName("main")
     .runtimeClasspath
 
-// ===== Tasks =====
+// ===== TrenchBroom tasks =====
 
-/**
- * Prompts for missing paths on first run.
- * Re-prompts only for keys whose stored value no longer points to an existing file.
- */
 tasks.register("ensurePaths") {
     group = "trenchbroom"
-    description = "Prompts for missing paths (textures.dir, trenchbroom.exe, palette.lmp)"
+    description = "Prompts for missing paths (textures.dir, trenchbroom.exe) via Swing dialog"
     dependsOn(":tools:classes")
     doLast {
         javaexec {
@@ -71,75 +64,12 @@ tasks.register("ensurePaths") {
             args(
                 "$projectDir/tools",
                 "textures.dir",
-                "trenchbroom.exe",
-                "palette.lmp"
+                "trenchbroom.exe"
             )
         }
     }
 }
 
-// Deletes all .wal files under the textures directory.
-tasks.register("cleanWalTextures") {
-    group = "trenchbroom"
-    description = "Deletes all .wal files under the textures directory"
-    dependsOn("ensurePaths")
-    doLast {
-        val texturesDir = file(requirePath("textures.dir"))
-        if (!texturesDir.exists()) {
-            logger.warn("Textures directory does not exist: ${texturesDir.absolutePath}")
-            return@doLast
-        }
-        var deleted = 0
-        texturesDir.walkTopDown()
-            .filter { it.isFile && it.extension.equals("wal", ignoreCase = true) }
-            .forEach { wal ->
-                logger.lifecycle("Deleting ${wal.absolutePath}")
-                if (wal.delete()) deleted++
-            }
-        logger.lifecycle("Deleted $deleted WAL file(s) from ${texturesDir.absolutePath}")
-    }
-}
-
-// Converts every PNG under the textures directory to a matching WAL file.
-tasks.register("convertAllPngToWal") {
-    group = "trenchbroom"
-    description = "Converts all .png files under the textures directory to .wal"
-    dependsOn("cleanWalTextures", ":tools:classes")
-    doLast {
-        val texturesDir = file(requirePath("textures.dir"))
-        val palette    = requirePath("palette.lmp")
-        if (!texturesDir.exists()) {
-            logger.warn("Textures directory does not exist: ${texturesDir.absolutePath}")
-            return@doLast
-        }
-        texturesDir.walkTopDown().filter { it.extension == "png" }.forEach { png ->
-            val wal = png.resolveSibling(png.nameWithoutExtension + ".wal")
-            logger.lifecycle("Converting ${png.absolutePath} -> ${wal.absolutePath}")
-            javaexec {
-                classpath = toolsRuntime
-                mainClass.set("lee.qore.tools.PngToWalConverter")
-                args(png.absolutePath, wal.absolutePath, palette)
-            }
-        }
-    }
-}
-
-// Validates PNG files under the textures directory.
-tasks.register("validateTextures") {
-    group = "trenchbroom"
-    description = "Validates PNG files under the textures directory"
-    dependsOn("ensurePaths")
-    doLast {
-        val texturesDir = file(requirePath("textures.dir"))
-        javaexec {
-            classpath = toolsRuntime
-            mainClass.set("lee.qore.tools.PngValidator")
-            args(texturesDir.absolutePath)
-        }
-    }
-}
-
-// Launches TrenchBroom in a detached process, so Gradle returns immediately.
 tasks.register("launchTrenchBroom") {
     group = "trenchbroom"
     description = "Launches TrenchBroom (detached, returns immediately)"
@@ -160,7 +90,6 @@ tasks.register("launchTrenchBroom") {
     }
 }
 
-// Shows all configured paths and whether they currently exist.
 tasks.register("showPaths") {
     group = "trenchbroom"
     description = "Shows all configured paths from tools/paths.properties"
@@ -179,7 +108,6 @@ tasks.register("showPaths") {
     }
 }
 
-// Deletes tools/paths.properties so the next trenchbroom task re-prompts for all paths.
 tasks.register("resetPaths") {
     group = "trenchbroom"
     description = "Deletes tools/paths.properties so the next run re-prompts"
@@ -190,11 +118,4 @@ tasks.register("resetPaths") {
             logger.lifecycle("No paths file to delete.")
         }
     }
-}
-
-// One-click pipeline: clean stale WALs, convert PNGs to WAL, then open TrenchBroom.
-tasks.register("editWithTrenchBroom") {
-    group = "trenchbroom"
-    description = "Cleans WALs, converts PNGs, and launches TrenchBroom"
-    dependsOn("convertAllPngToWal", "launchTrenchBroom")
 }

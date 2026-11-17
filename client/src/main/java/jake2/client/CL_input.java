@@ -106,6 +106,8 @@ public class CL_input {
 
 	private static kbutton_t in_down = new kbutton_t();
 
+	private static kbutton_t in_flashlight = new kbutton_t();
+
 	private static int in_impulse;
 
 	private static void KeyDown(kbutton_t b, List<String> args) {
@@ -358,6 +360,17 @@ public class CL_input {
 	}
 
 	/*
+	 * ===================FlashlightActivate_f=======================
+	 */
+
+	private static void FlashlightActivate_f(List<String> args){
+		if (args.size() > 1) return;
+		if (ClientGlobals.cl_enable_flashlight.value == 0) return;
+        ClientGlobals.cl_flashlight.value = (ClientGlobals.cl_flashlight.value == 1.0f) ? 0.0f : 1.0f;
+		Com.Printf(String.valueOf(ClientGlobals.cl_flashlight.value) + "\n");
+	}
+
+	/*
 	 * ============ CL_InitInput ============
 	 */
 	static void InitInput() {
@@ -393,6 +406,7 @@ public class CL_input {
 		Cmd.AddCommand("impulse", (List<String> args) -> in_impulse = Lib.atoi(args.get(1)));
 		Cmd.AddCommand("+klook", (List<String> args) -> KeyDown(in_klook, args));
 		Cmd.AddCommand("-klook", (List<String> args) -> KeyUp(in_klook, args));
+		Cmd.AddCommand("activate_flashlight", CL_input::FlashlightActivate_f);
 
 		cl_nodelta = Cvar.getInstance().Get("cl_nodelta", "0", 0);
 	}
