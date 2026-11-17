@@ -1105,7 +1105,7 @@ public class SV_MAIN implements JakeServer {
     private static GameExports createGameModInstance(GameImportsImpl gameImports) {
         // todo: introduce proper Dependency Injection
         try {
-            Class<?> game = Class.forName("jake2.game.flee.FleeGameExports");
+            Class<?> game = Class.forName("lee.dh.game.DHGameExports");
             Constructor<?> constructor = game.getConstructor(GameImports.class);
             return (GameExports) constructor.newInstance(gameImports);
         } catch (Exception e) {

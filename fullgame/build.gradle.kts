@@ -31,6 +31,7 @@ dependencies {
     implementation(project(":server"))
 
     runtimeOnly(project(":game"))
+    runtimeOnly(project(":dh"))
     testImplementation(project(":game"))
 }
 
