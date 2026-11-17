@@ -491,4 +491,13 @@ public class Math3D {
 
 		return (float) a;
 	}
+	public static float DELTAMOD(float angle){
+		angle = angle % 360.0f;
+		if (angle > 180.0f) {
+			angle -= 360.0f;
+		} else if (angle < -180.0f) {
+			angle += 360.0f;
+		}
+		return angle;
+	}
 }

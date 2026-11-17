@@ -49,6 +49,16 @@ public class CL_ents {
 
 	static int bfg_lightramp[] = { 300, 400, 600, 300, 150, 75 };
 
+	private static float[] prevViewAngles = new float[3];
+
+	private static float[] swayAngles = new float[3];
+
+	private static float[] swayOffset = {4.0f,5.0f,3.0f};
+
+	private static float swaySmoothing = .9f;
+
+	private static float swayAmount = .05f;
+
 	/*
 	 * CL_DeltaEntity
 	 * 
@@ -873,6 +883,36 @@ public class CL_ents {
 					* (ps.gunoffset[i] - ops.gunoffset[i]);
 			gun.angles[i] = ClientGlobals.cl.refdef.viewangles[i] + Math3D.LerpAngle(ops.gunangles[i], ps.gunangles[i], ClientGlobals.cl.lerpfrac);
 		}
+
+		float deltaYaw = Math3D.DELTAMOD(ClientGlobals.cl.refdef.viewangles[1] - prevViewAngles[1]);
+		float deltaPitch = Math3D.DELTAMOD(ClientGlobals.cl.refdef.viewangles[0] - prevViewAngles[0]);
+
+		swayAngles[1] = swayAngles[1] + (deltaYaw - swayAngles[1]) * swayAmount;
+		swayAngles[0] = swayAngles[0] + (deltaPitch - swayAngles[0]) * swayAmount;
+
+		float targetRoll = -deltaYaw * 0.3f;
+		swayAngles[2] = swayAngles[2] + (targetRoll - swayAngles[2]) * swayAmount;
+
+		for (i = 0; i < 3; i++) {
+			if (swayAngles[i] > swayOffset[i]) {
+				swayAngles[i] = swayOffset[i];
+			} else if (swayAngles[i] < -swayOffset[i]) {
+				swayAngles[i] = -swayOffset[i];
+			}
+		}
+
+		float idleThreshold = 0.5f; // If mouse movement is very small, consider it idle
+		if (Math.abs(deltaYaw) < idleThreshold && Math.abs(deltaPitch) < idleThreshold) {
+			swayAngles[0] *= swaySmoothing;
+			swayAngles[1] *= swaySmoothing;
+			swayAngles[2] *= swaySmoothing;
+		}
+
+		gun.angles[0] += swayAngles[0];
+		gun.angles[1] += swayAngles[1];
+		gun.angles[2] += swayAngles[2];
+
+		Math3D.VectorCopy(ClientGlobals.cl.refdef.viewangles, prevViewAngles);
 
 		if (ClientGlobals.gun_frame != 0) {
 			gun.frame = ClientGlobals.gun_frame; // development tool
