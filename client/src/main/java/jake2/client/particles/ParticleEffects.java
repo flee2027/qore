@@ -16,7 +16,7 @@ public final class ParticleEffects {
      * {@code [0.3*speed, speed]}; lifetime is in
      * {@code [lifespanMin, lifespanMax]}.
      *
-     * <p>No-op if the particle subsystem is disabled via cl_new_particles.
+     * No-op if the particle subsystem is disabled via cl_new_particles.
      */
 
     // ===== Generic burst utility =====
