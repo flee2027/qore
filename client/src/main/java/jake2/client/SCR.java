@@ -460,6 +460,7 @@ public final class SCR extends Globals {
         Cmd.AddCommand("showpos", SCR::ShowPos_f);
         Cmd.AddCommand("testparticles", SCR::TestParticles_f);
         Cmd.AddCommand("testfx", SCR::TestFx_f);
+        Cmd.AddCommand("testfirefly", SCR::TestFirefly_f);
 
         scr_initialized = true;
     }
@@ -1427,6 +1428,16 @@ public final class SCR extends Globals {
             case "rail":       ParticleEffects.railTrail(pos); break;
             case "teleport":   ParticleEffects.teleport(pos); break;
             default: Com.Printf("unknown effect: " + args.get(1) + "\n");
+        }
+    }
+
+    private static void TestFirefly_f(List<String> args){
+        if (args.size() < 2){
+            Com.Printf("Spawned!\n");
+            ParticleEffects.spawnFireFlyCluster(ClientGlobals.cl.refdef.vieworg[0], ClientGlobals.cl.refdef.vieworg[1], ClientGlobals.cl.refdef.vieworg[2], 10, 45.0f, 10.0f, ParticleSystem.getFireFlyTexnum());
+        }
+        else{
+            Com.Printf(":P\n");
         }
     }
 

@@ -1,6 +1,10 @@
 package jake2.client.particles;
 
 import jake2.client.ParticleSystem;
+import jake2.qcommon.util.Lib;
+import jake2.qcommon.util.Math3D;
+
+import java.util.List;
 
 public final class ParticleEffects {
 
@@ -35,6 +39,29 @@ public final class ParticleEffects {
             ParticleSystem.spawn(cx, cy, cz,
                     dirX * sp, dirY * sp, dirZ * sp,
                     ls, colorRgb, sz);
+        }
+    }
+
+    public static void spawnFireFlyCluster(float cx, float cy, float cz, int count, float radius, float lifespan, int texId){
+        if (!ParticleSystem.isEnabled()) return;
+
+        for (int i = 0; i < count; i++){
+            float offsetX = (float) ((Math.random() * 2.0 - 1.0) * radius);
+            float offsetY = (float) ((Math.random() * 2.0 - 1.0) * radius);
+            float offsetZ = (float) (Math.random() * radius * 2.0);
+
+            float px = cx + offsetX;
+            float py = cy + offsetY;
+            float pz = cz + offsetZ;
+
+            int a = 255;
+            int r = 200 + (int) (Lib.random() * 55);
+            int g = 200 + (int) (Lib.random() * 55);
+            int b = (int) (Lib.random() * 100);
+
+            int packedColor = (a << 24) | (r << 16) | (g << 8) | b;
+
+            ParticleSystem.spawnBillboard(px,py,pz,0f,0f,0f,lifespan,packedColor, 6.0f, texId);
         }
     }
 
