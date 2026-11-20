@@ -4,7 +4,6 @@ import jake2.qcommon.Defines;
 import jake2.qcommon.edict_t;
 import jake2.qcommon.entity_state_t;
 import jake2.qcommon.network.messages.NetworkMessage;
-import jake2.qcommon.network.messages.server.dh.FireflyTEMessage;
 import jake2.qcommon.sizebuf_t;
 
 /**
@@ -205,7 +204,7 @@ public abstract class ServerMessage implements NetworkMessage {
                     msg = new TrailTEMessage(subtype);
                 } else if (SplashTEMessage.SUBTYPES.contains(subtype)) {
                     msg = new SplashTEMessage(subtype);
-                } else if (subtype == Defines.TE_FIREFLY) {
+                } else if (FireflyTEMessage.SUBTYPES.contains(subtype)) {
                     msg = new FireflyTEMessage();
                 } else {
                     throw new IllegalStateException("Unexpected temp entity type:" + subtype);

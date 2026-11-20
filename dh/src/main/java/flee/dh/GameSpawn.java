@@ -33,9 +33,7 @@ import jake2.qcommon.Defines;
 import jake2.qcommon.EntityParserKt;
 import jake2.qcommon.edict_t;
 import jake2.qcommon.network.MulticastTypes;
-import jake2.qcommon.network.messages.server.ServerDataMessage;
-import jake2.qcommon.network.messages.server.ServerMessage;
-import jake2.qcommon.network.messages.server.dh.FireflyTEMessage;
+import jake2.qcommon.network.messages.server.FireflyTEMessage;
 import jake2.qcommon.util.Lib;
 import jake2.qcommon.util.Math3D;
 
@@ -588,7 +586,6 @@ public class GameSpawn {
 
             public boolean think(SubgameEntity self, GameExportsImpl g) {
                 FireflyTEMessage msg = new FireflyTEMessage(
-                        Defines.TE_FIREFLY,
                         self.s.origin,
                         self.count,
                         (int)(self.speed * 8.0f)

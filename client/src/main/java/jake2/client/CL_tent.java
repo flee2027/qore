@@ -31,6 +31,7 @@ import jake2.client.sound.S;
 import jake2.client.sound.sfx_t;
 import jake2.qcommon.*;
 import jake2.qcommon.network.messages.server.*;
+import jake2.qcommon.network.messages.server.FireflyTEMessage;
 import jake2.qcommon.util.Lib;
 import jake2.qcommon.util.Math3D;
 
@@ -1127,6 +1128,18 @@ public class CL_tent {
                     ParsePlayerBeam(cl_mod_monster_heatbeam, m);
                     break;
             }
+        } else if (msg instanceof FireflyTEMessage) {
+            FireflyTEMessage m = (FireflyTEMessage) msg;
+
+            ParticleEffects.spawnFireFlyCluster(
+                    m.origin[0],
+                    m.origin[1],
+                    m.origin[2],
+                    m.count,
+                    m.radius / 8.0f,
+                    10.0f,
+                    ParticleSystem.getFireFlyTexnum()
+            );
         }
     }
 
