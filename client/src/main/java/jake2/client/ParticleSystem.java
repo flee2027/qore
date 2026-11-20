@@ -190,12 +190,11 @@ public final class ParticleSystem {
                 pz[i] += vz[i] * dt;
 
                 if (i % 4 == 0) {
-
                     float lifeRatio = getLifeRatio(i);
-                    float currentIntensity = 300.0f;
+                    float currentIntensity = 210.0f;
 
                     if (lifeRatio < 0.2f) {
-                        currentIntensity = 300.0f * (lifeRatio / 0.2f);
+                        currentIntensity = 210.0f * (lifeRatio / 0.2f);
                     }
 
                     int c = rgb[i];
@@ -203,9 +202,20 @@ public final class ParticleSystem {
                     float g = ((c >> 8) & 0xFF) / 255.0f;
                     float b = (c & 0xFF) / 255.0f;
 
-                    float[] pos = {px[i], py[i], pz[i]};
+                    int key = -2000 - i;
+                    jake2.client.CL_fx.cdlight_t dl = jake2.client.CL_fx.AllocDlight(key);
 
-                    V.AddLight(pos, currentIntensity, r, g, b);
+                    if (dl != null) {
+                        dl.origin[0] = px[i];
+                        dl.origin[1] = py[i];
+                        dl.origin[2] = pz[i];
+                        dl.color[0] = r;
+                        dl.color[1] = g;
+                        dl.color[2] = b;
+                        dl.radius = currentIntensity;
+
+                        dl.die = ClientGlobals.cl.time + 100.0f;
+                    }
                 }
             }
         }
@@ -260,32 +270,47 @@ public final class ParticleSystem {
 
         if (billboardCount > 0) {
             int tex = getFireFlyTexnum();
-            if (tex == 0) return;
 
-            GL11.glEnable(GL11.GL_TEXTURE_2D);
-            GL11.glBindTexture(GL11.GL_TEXTURE_2D, tex);
-            GL11.glEnable(GL11.GL_BLEND);
-            GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
-            GL11.glDepthMask(false);
+            if (tex != 0) {
+                GL11.glEnable(GL11.GL_TEXTURE_2D);
+                GL11.glBindTexture(GL11.GL_TEXTURE_2D, tex);
+                GL11.glEnable(GL11.GL_BLEND);
+                GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
+                GL11.glDepthMask(false);
 
-            for (int i = 0; i < MAX_PARTICLES; i++) {
-                if (!active[i] || type[i] != 1) continue;
+                for (int i = 0; i < MAX_PARTICLES; i++) {
+                    if (!active[i] || type[i] != 1) continue;
 
-                float lifeRatio = getLifeRatio(i);
-                int c = rgb[i];
-                float r = ((c >> 16) & 0xFF) / 255.0f;
-                float g = ((c >> 8)  & 0xFF) / 255.0f;
-                float b = ( c        & 0xFF) / 255.0f;
+                    float lifeRatio = getLifeRatio(i);
+                    int c = rgb[i];
+                    float r = ((c >> 16) & 0xFF) / 255.0f;
+                    float g = ((c >> 8)  & 0xFF) / 255.0f;
+                    float b = ( c        & 0xFF) / 255.0f;
 
-                GL11.glColor4f(r, g, b, lifeRatio);
-                drawBillboardQuad(px[i], py[i], pz[i], size[i]);
+                    float alpha = 1.0f;
+                    float currentSize = size[i];
+
+                    if (lifeRatio < 0.5f) {
+                        float t = lifeRatio / 0.5f;
+
+                        alpha = t * t;
+
+                        currentSize = size[i] * t;
+                    }
+
+                    GL11.glColor4f(r, g, b, alpha);
+                    drawBillboardQuad(px[i], py[i], pz[i], currentSize);
+                }
+
+                GL11.glDepthMask(true);
+                GL11.glDisable(GL11.GL_BLEND);
             }
-
-            GL11.glDepthMask(true);
-            GL11.glEnable(GL11.GL_BLEND);
-            GL11.glEnable(GL11.GL_TEXTURE_2D);
-            GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
         }
+        GL11.glDepthMask(true);
+        GL11.glEnable(GL11.GL_BLEND);
+        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+        GL11.glEnable(GL11.GL_TEXTURE_2D);
+        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
     }
 
     /** Removes all particles (e.g. on map change). */

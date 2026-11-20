@@ -55,13 +55,13 @@ public final class ParticleEffects {
             float pz = cz + offsetZ;
 
             int a = 255;
-            int r = 200 + (int) (Lib.random() * 55);
-            int g = 200 + (int) (Lib.random() * 55);
-            int b = (int) (Lib.random() * 100);
+            int r = 200 + (int) (Math.random() * 55);
+            int g = 200 + (int) (Math.random() * 55);
+            int b = (int) (Math.random() * 100);
 
             int packedColor = (a << 24) | (r << 16) | (g << 8) | b;
 
-            ParticleSystem.spawnBillboard(px,py,pz,0f,0f,0f,lifespan,packedColor, 6.0f, texId);
+            ParticleSystem.spawnBillboard(px,py,pz,0f,0f,0f,lifespan,packedColor, 8.0f, texId);
         }
     }
 
