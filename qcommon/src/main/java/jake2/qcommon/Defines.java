@@ -658,6 +658,10 @@ public class Defines {
 	public final static int TE_EXPLOSION1_NP = 54;
 	public final static int TE_FLECHETTE = 55;
 
+	// custom qore stuff
+
+	public final static int TE_FIREFLY = 56;
+
 	//	content masks
 	public final static int MASK_ALL = (-1);
 	public final static int MASK_SOLID = (CONTENTS_SOLID | CONTENTS_WINDOW);
