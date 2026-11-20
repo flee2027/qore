@@ -32,6 +32,10 @@ import jake2.qcommon.Com;
 import jake2.qcommon.Defines;
 import jake2.qcommon.EntityParserKt;
 import jake2.qcommon.edict_t;
+import jake2.qcommon.network.MulticastTypes;
+import jake2.qcommon.network.messages.server.ServerDataMessage;
+import jake2.qcommon.network.messages.server.ServerMessage;
+import jake2.qcommon.network.messages.server.dh.FireflyTEMessage;
 import jake2.qcommon.util.Lib;
 import jake2.qcommon.util.Math3D;
 
@@ -560,6 +564,41 @@ public class GameSpawn {
         spawns.put("turret_driver", TurretKt::turretDriver);
 
         spawns.put("func_model", GameSpawn::funcModel);
+    }
+
+    /**
+     * QUAKED misc_firefly (0 1 0) (-8 -8 -8) (8 8 8)
+     * Firefly swarm emitter. Spawns a cluster of glowing particles periodically.
+     * "count" - number of fireflies (default 10)
+     * "radius" - spawn radius in units (default 64)
+     * "wait" - seconds between spawns (default 2.0)
+     */
+    static void SP_misc_firefly(SubgameEntity ent, GameExportsImpl game) {
+        if (ent.count == 0) ent.count = 10;
+        if (ent.speed == 0) ent.speed = 64.0f; // Используем speed как радиус
+        if (ent.wait == 0) ent.wait = 2.0f;
+
+        ent.think.nextTime = game.level.time + 1.0f;
+
+        ent.think.action = new EntThinkAdapter() {
+            public String getID() {
+                return "firefly_think";
+            }
+
+            public boolean think(SubgameEntity self, GameExportsImpl g) {
+                FireflyTEMessage msg = new FireflyTEMessage(
+                        Defines.TE_FIREFLY,
+                        self.s.origin,
+                        self.count,
+                        (int)(self.speed * 8.0f)
+                );
+
+                g.gameImports.multicastMessage(self.s.origin, msg, MulticastTypes.MULTICAST_PVS);
+
+                self.think.nextTime = g.level.time + self.wait;
+                return true;
+            }
+        };
     }
 
     /**
