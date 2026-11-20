@@ -564,6 +564,7 @@ public class GameSpawn {
         spawns.put("turret_driver", TurretKt::turretDriver);
 
         spawns.put("func_model", GameSpawn::funcModel);
+        spawns.put("misc_firefly", GameSpawn::SP_misc_firefly);
     }
 
     /**
