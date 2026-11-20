@@ -289,13 +289,25 @@ public final class ParticleSystem {
 
                     float alpha = 1.0f;
                     float currentSize = size[i];
+                    float growDuration = 0.2f;
 
-                    if (lifeRatio < 0.5f) {
-                        float t = lifeRatio / 0.5f;
+                    if (lifeRatio > (1.0f - growDuration)) {
+                        float t = (1.0f - lifeRatio) / growDuration;
 
-                        alpha = t * t;
+                        float ease = t * t;
 
-                        currentSize = size[i] * t;
+                        alpha = ease;
+                        currentSize = size[i] * ease;
+                    }
+
+                    else if (lifeRatio < 0.3f) {
+                        float t = lifeRatio / 0.3f;
+
+                        float ease = t * t;
+
+                        alpha = ease;
+
+                        currentSize = size[i] * ease;
                     }
 
                     GL11.glColor4f(r, g, b, alpha);
