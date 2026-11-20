@@ -366,17 +366,22 @@ public class PlayerClient {
 
         client.pers = new client_persistant_t();
 
-        item = GameItems.FindItem("Blaster", gameExports);
-        client.pers.selected_item = item.index;
-        client.pers.inventory[client.pers.selected_item] = 1;
+        item = GameItems.FindItem("weapon_hands", gameExports);
+
+        if (item != null) {
+            client.pers.selected_item = item.index;
+            client.pers.inventory[client.pers.selected_item] = 1;
+            client.pers.weapon = item;
+        } else {
+            client.pers.selected_item = -1;
+            client.pers.weapon = null;
+        }
 
         /*
          * Give shotgun. item = FindItem("Shotgun"); client.pers.selected_item =
          * ITEM_INDEX(item); client.pers.inventory[client.pers.selected_item] =
          * 1;
          */
-
-        client.pers.weapon = item;
 
         client.pers.health = 100;
         client.pers.max_health = 100;
@@ -797,8 +802,11 @@ public class PlayerClient {
                 client.getPlayerState().fov = 160;
         }
 
-        client.getPlayerState().gunindex = gameExports.gameImports
-                .modelindex(client.pers.weapon.view_model);
+        if (client.pers.weapon != null && client.pers.weapon.view_model != null && !client.pers.weapon.view_model.isEmpty()) {
+            client.getPlayerState().gunindex = gameExports.gameImports.modelindex(client.pers.weapon.view_model);
+        } else {
+            client.getPlayerState().gunindex = 0;
+        }
 
         // clear entity state values
         ent.s.effects = 0;
@@ -846,8 +854,12 @@ public class PlayerClient {
         gameExports.gameImports.linkentity(ent);
 
         // force the current weapon up
-        client.newweapon = client.pers.weapon;
-        PlayerWeapon.ChangeWeapon(ent, gameExports);
+        if (client.pers.weapon != null) {
+            client.newweapon = client.pers.weapon;
+            PlayerWeapon.ChangeWeapon(ent, gameExports);
+        } else {
+            client.newweapon = null;
+        }
     }
 
     /**
@@ -1235,16 +1247,14 @@ public class PlayerClient {
         // fire weapon from final position if needed
         if ((client.latched_buttons & Defines.BUTTON_ATTACK) != 0) {
             if (client.resp.spectator) {
-
                 client.latched_buttons = 0;
-
                 if (client.chase_target != null) {
                     client.chase_target = null;
                     client.getPlayerState().pmove.pm_flags &= ~Defines.PMF_NO_PREDICTION;
-                } else
+                } else {
                     GameChase.GetChaseTarget(ent, gameExports);
-
-            } else if (!client.weapon_thunk) {
+                }
+            } else if (client.pers.weapon != null && !client.weapon_thunk) {
                 client.weapon_thunk = true;
                 PlayerWeapon.Think_Weapon(ent, gameExports);
             }

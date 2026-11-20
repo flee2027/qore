@@ -1146,6 +1146,12 @@ public class GameItems {
      * entity that hasn't spawned yet.
      */
     public static void SpawnItem(SubgameEntity ent, GameItem item, GameExportsImpl gameExports) {
+        if (item == null) {
+            gameExports.gameImports.dprintf("SpawnItem ERROR: item is null!\n");
+            return;
+        }
+        gameExports.gameImports.dprintf("SpawnItem: " + item.classname + ", world_model=" + item.world_model + "\n");
+
         PrecacheItem(item, gameExports);
 
         if (ent.spawnflags != 0) {
@@ -1248,6 +1254,11 @@ public class GameItems {
             // change selected item
             if (ent.item.use != null)
                 client.pers.selected_item = client.getPlayerState().stats[Defines.STAT_SELECTED_ITEM] = (short) ent.item.index;
+
+            if (client.pers.weapon == null && (ent.item.flags & GameDefines.IT_WEAPON) != 0) {
+                client.newweapon = ent.item;
+                PlayerWeapon.ChangeWeapon(other, gameExports);
+            }
     
             if (ent.item.pickup == Pickup_Health) {
                 if (ent.count == 2)

@@ -1061,6 +1061,7 @@ public class PlayerWeapon {
      * The old weapon has been dropped all the way, so make the new one current
      * ===============
      */
+
     public static void ChangeWeapon(SubgameEntity ent, GameExportsImpl gameExports) {
         int i;
 
@@ -1074,6 +1075,11 @@ public class PlayerWeapon {
 
         client.pers.lastweapon = client.pers.weapon;
         client.pers.weapon = client.newweapon;
+        if (client.pers.weapon != null && client.pers.weapon.view_model != null && !client.pers.weapon.view_model.isEmpty()) {
+            client.getPlayerState().gunindex = gameExports.gameImports.modelindex(client.pers.weapon.view_model);
+        } else {
+            client.getPlayerState().gunindex = 0;
+        }
         client.newweapon = null;
         client.machinegun_shots = 0;
 
@@ -1101,8 +1107,11 @@ public class PlayerWeapon {
 
         client.weaponstate = WeaponStates.WEAPON_ACTIVATING;
         client.getPlayerState().gunframe = 0;
-        client.getPlayerState().gunindex = gameExports.gameImports
-                .modelindex(client.pers.weapon.view_model);
+        if (client.pers.weapon != null && client.pers.weapon.view_model != null && !client.pers.weapon.view_model.isEmpty()) {
+            client.getPlayerState().gunindex = gameExports.gameImports.modelindex(client.pers.weapon.view_model);
+        } else {
+            client.getPlayerState().gunindex = 0;
+        }
 
         client.anim_priority = Defines.ANIM_PAIN;
         if ((client.getPlayerState().pmove.pm_flags & Defines.PMF_DUCKED) != 0) {

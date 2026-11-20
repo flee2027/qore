@@ -190,6 +190,8 @@ public class GameUtil {
 
         gclient_t cl = ent.getClient();
 
+        if (cl.pers.selected_item == -1) return;
+
         if (cl.pers.inventory[cl.pers.selected_item] != 0)
             return; // valid
 
