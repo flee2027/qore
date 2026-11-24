@@ -4,54 +4,20 @@ plugins {
 
 application {
     mainClass.set("jake2.fullgame.Jake2")
-    // add library path for both cases: when we run from a shell script or from `gradle run`
     applicationDefaultJvmArgs = listOf(
         "-Djava.library.path=${layout.buildDirectory.get()}/install/fullgame/lib"
     )
-
-
-    distributions {
-        main {
-            contents {
-                // copy to the root folder of the distribution, so that bin/.. (java.library.path) points to the native libs
-                from("build/natives") {
-                    into("lib")
-                }
-            }
-        }
-    }
-
 }
-
-
 
 dependencies {
     implementation(project(":qcommon"))
     implementation(project(":client"))
     implementation(project(":server"))
-
     runtimeOnly(project(":game"))
     testImplementation(project(":game"))
 }
 
-task("listNatives") {
-    doLast {
-        val platforms = listOf("windows", "linux", "osx")
-        platforms.forEach { pl ->
-            val nativeLibs = configurations["runtimeClasspath"].resolvedConfiguration.resolvedArtifacts.filter {
-                it.classifier == "natives-$pl"
-            }
-            println("[$pl] found libs $nativeLibs")
-        }
-    }
-}
-
-
-/*
- * thanks to this thread
- * https://discuss.gradle.org/t/how-to-use-lwjgl-or-how-to-use-native-libraries/7498/13
- */
-task("copyNatives") {
+tasks.register("copyNatives") {
     doLast {
         copy {
             val platforms = listOf("windows", "linux", "osx")
@@ -60,9 +26,7 @@ task("copyNatives") {
                 val nativeLibs = configurations["runtimeClasspath"].resolvedConfiguration.resolvedArtifacts.filter {
                     it.classifier == "natives-$pl"
                 }
-                println("[$pl] found libs $nativeLibs")
                 nativeLibs.forEach {
-                    println("[$pl] copying ${it.file}")
                     from(zipTree(it.file))
                 }
             }
@@ -71,7 +35,74 @@ task("copyNatives") {
     }
 }
 
-tasks["installDist"].dependsOn("copyNatives")
-tasks["distZip"].dependsOn("copyNatives")
-tasks["distTar"].dependsOn("copyNatives")
-tasks["run"].dependsOn("installDist")
+tasks.named("installDist").configure {
+    dependsOn("copyNatives")
+}
+
+tasks.register("buildQoreDist") {
+    dependsOn("jar", "copyNatives")
+
+    val distDir = layout.buildDirectory.dir("qore-release").get().asFile
+
+    doLast {
+        distDir.mkdirs()
+        val libDir = File(distDir, "lib").apply { mkdirs() }
+
+        val mainJar = tasks.jar.get().archiveFile.get().asFile
+        copy {
+            from(mainJar)
+            into(distDir)
+            rename { "qore.jar" }
+        }
+
+        copy {
+            from(configurations.runtimeClasspath)
+            into(libDir)
+            exclude("*natives-windows.jar", "*natives-linux.jar", "*natives-osx.jar")
+        }
+
+        copy {
+            from("${buildDir}/natives")
+            into(libDir)
+        }
+
+        val shScript = File(distDir, "qore.sh")
+        shScript.writeText("""
+            #!/bin/sh
+            
+            export GDK_BACKEND=x11
+            export SDL_VIDEODRIVER=x11
+            
+            APP_HOME=${'$'}(cd "${'$'}(dirname "${'$'}0")" && pwd)
+            
+            if [ -n "${'$'}JAVA_HOME" ]; then
+                JAVACMD="${'$'}JAVA_HOME/bin/java"
+            else
+                JAVACMD="java"
+            fi
+            
+            exec "${'$'}JAVACMD" -cp "qore.jar:lib/*" jake2.fullgame.Jake2 "${'$'}@"
+        """.trimIndent())
+        shScript.setExecutable(true)
+
+        val batScript = File(distDir, "qore.bat")
+        batScript.writeText("""
+            @echo off
+            setlocal
+            
+            set APP_HOME=%~dp0
+            
+            if defined JAVA_HOME (
+                set JAVACMD="%JAVA_HOME%\bin\java.exe"
+            ) else (
+                set JAVACMD="java.exe"
+            )
+            
+            %JAVACMD% -cp "qore.jar;lib/*" jake2.fullgame.Jake2 %*
+            
+            endlocal
+        """.trimIndent())
+
+        println("Build successful. Output directory: ${distDir.absolutePath}")
+    }
+}
