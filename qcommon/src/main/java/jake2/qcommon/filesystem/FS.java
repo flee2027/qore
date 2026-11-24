@@ -870,4 +870,9 @@ public final class FS extends Globals {
 
         return 0;
     }
+
+    public static cvar_t getFs_basedir() {
+        return fs_basedir;
+    }
+
 }

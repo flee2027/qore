@@ -52,8 +52,7 @@ import java.nio.ByteOrder;
 import java.util.Collections;
 import java.util.List;
 
-import static jake2.qcommon.Defines.MASK_SOLID;
-import static jake2.qcommon.Defines.NS_CLIENT;
+import static jake2.qcommon.Defines.*;
 import static jake2.qcommon.exec.Cmd.getArguments;
 
 /**
@@ -1508,7 +1507,7 @@ public final class CL {
             float[] playerHeadPosition = ClientGlobals.cl.refdef.vieworg;
             float[] destination = new float[3];
             Math3D.VectorMA(playerHeadPosition, ClientGlobals.cl_distance_flashlight.value, ClientGlobals.cl.v_forward, destination);
-            trace_t tracePosition = ClientGlobals.cm.BoxTrace(playerHeadPosition, destination, Globals.vec3_origin, Globals.vec3_origin, 0, MASK_SOLID);
+            trace_t tracePosition = ClientGlobals.cm.BoxTrace(playerHeadPosition, destination, Globals.vec3_origin, Globals.vec3_origin, 0, MASK_ALL);
             if (tracePosition.fraction < 1.0f) {
                 //хак ибо нехер выстрелам и монстрам выебываться! :D
                 CL_fx.cdlight_t dl = CL_fx.AllocDlight(-999);

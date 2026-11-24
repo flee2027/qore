@@ -1,21 +1,21 @@
 /*
  * Copyright (C) 1997-2001 Id Software, Inc.
- * 
+ *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation; either version 2 of the License, or (at your option) any later
  * version.
- * 
+ *
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.
- * 
+ *
  * See the GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License along with
  * this program; if not, write to the Free Software Foundation, Inc., 59 Temple
  * Place - Suite 330, Boston, MA 02111-1307, USA.
- *  
+ *
  */
 
 // Created on 13.01.2004 by RST.
@@ -45,8 +45,10 @@ import jake2.qcommon.util.Lib;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.lang.reflect.Constructor;
+import java.net.URLClassLoader;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -350,7 +352,7 @@ public class SV_MAIN implements JakeServer {
         Com.DPrintf("new client added.\n");
     }
 
-    /** 
+    /**
      * Checks if the rcon password is corect.
      */
     private static boolean Rcon_Validate(List<String> args) {
@@ -440,7 +442,7 @@ public class SV_MAIN implements JakeServer {
 
     /**
      * SV_PrepWorldFrame
-     * 
+     *
      * This has to be done before the world logic, because player processing
      * happens outside RunWorldFrame.
      */
@@ -1103,9 +1105,32 @@ public class SV_MAIN implements JakeServer {
      * Find and create an instance of the game subsystem
      */
     private static GameExports createGameModInstance(GameImportsImpl gameImports) {
-        // todo: introduce proper Dependency Injection
         try {
-            Class<?> game = Class.forName("flee.dh.GameExportsImpl");
+            String basedir = FS.getFs_basedir().string;
+            String gamedir = FS.fs_gamedirvar.string;
+            if (gamedir == null || gamedir.isEmpty()) {
+                gamedir = "baseq2";
+            }
+            URLClassLoader mod = GameModLoader.loadMod(basedir, gamedir);
+            Class<?> game = null;
+            if (mod == null){
+                String fallbackClass = gamedir.equals("baseq2") ? "jake2.game.GameExportsImpl" : "flee.dh.GameExportsImpl";
+                game = Class.forName(fallbackClass);
+            }
+            else{
+                try (InputStream is = mod.getResourceAsStream("qore-module.properties");) {
+                    if (is == null){
+                        throw new IllegalStateException("Where is qore-module.properties in " + gamedir + ".jar");
+                    }
+                    Properties modProperties = new Properties();
+                    modProperties.load(is);
+                    String className = modProperties.getProperty("entry.class");
+                    if (className == null || className.trim().isEmpty()) {
+                        throw new IllegalStateException("Where 'entry.class' key in qore-module.properties?");
+                    }
+                    game = mod.loadClass(className);
+                }
+            }
             Constructor<?> constructor = game.getConstructor(GameImports.class);
             return (GameExports) constructor.newInstance(gameImports);
         } catch (Exception e) {
