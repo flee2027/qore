@@ -7,10 +7,11 @@ import java.net.URLClassLoader;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class GameModLoader {
     // Cache loaded classes to avoid ClassCastException on map changes
-    private static final Map<String, Class<?>> classCache = new HashMap<>();
+    private static final Map<String, Class<?>> classCache = new ConcurrentHashMap<>();
 
     public static Class<?> getGameClass(String basedir, String gamedir) throws Exception {
         if (gamedir == null || gamedir.isEmpty()) {

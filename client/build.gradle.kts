@@ -8,3 +8,10 @@ dependencies {
     implementation("org.lwjgl.lwjgl:lwjgl_util:${lwjgl_version}")
     implementation("javazoom:jlayer:1.0.1")
 }
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+    kotlinOptions.jvmTarget = "17"
+}
+tasks.withType<JavaCompile> {
+    sourceCompatibility = "17"
+    targetCompatibility = "17"
+}

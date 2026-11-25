@@ -1107,13 +1107,17 @@ public class SV_MAIN implements JakeServer {
     private static GameExports createGameModInstance(GameImportsImpl gameImports) {
         try {
             String basedir = FS.getFs_basedir().string;
-            String gamedir = FS.fs_gamedirvar.string;
+            String gamedir = Objects.equals(FS.fs_gamedirvar.string, "") || FS.fs_gamedirvar.string == null ? "baseq2" : FS.fs_gamedirvar.string;
+
+            Com.Printf("[MOD] Loading game module: " + gamedir + "\n");
 
             // Get class from cache or load it for the first time
             Class<?> gameClass = GameModLoader.getGameClass(basedir, gamedir);
+            Com.Printf("[MOD] Successfully loaded from: " + basedir + "/" + gamedir + "/" + gamedir + ".jar" + "\n");
 
             // Create instance
             Constructor<?> constructor = gameClass.getConstructor(GameImports.class);
+            Com.Printf("[MOD] Entry class: " + String.valueOf(gameClass) + "\n");
             return (GameExports) constructor.newInstance(gameImports);
 
         } catch (Exception e) {

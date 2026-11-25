@@ -51,42 +51,42 @@ public class Vargs {
 	}
 
 	public Vargs add(boolean value) {
-		v.add(new Boolean(value));
+		v.add(Boolean.valueOf(value));
 		return this;
 	}
 
 	public Vargs add(byte value) {
-		v.add(new Byte(value));
+		v.add(Byte.valueOf(value));
 		return this;
 	}
 
 	public Vargs add(char value) {
-		v.add(new Character(value));
+		v.add(Character.valueOf(value));
 		return this;
 	}
 
 	public Vargs add(short value) {
-		v.add(new Short(value));
+		v.add(Short.valueOf(value));
 		return this;
 	}
 
 	public Vargs add(int value) {
-		v.add(new Integer(value));
+		v.add(Integer.valueOf(value));
 		return this;
 	}
 
 	public Vargs add(long value) {
-		v.add(new Long(value));
+		v.add(Long.valueOf(value));
 		return this;
 	}
 
 	public Vargs add(float value) {
-		v.add(new Float(value));
+		v.add(Float.valueOf(value));
 		return this;
 	}
 
 	public Vargs add(double value) {
-		v.add(new Double(value));
+		v.add(Double.valueOf(value));
 		return this;
 	}
 
