@@ -241,9 +241,8 @@ public abstract class Main extends Base {
 			return false;
 
 		for (int i = 0; i < 4; i++) {
-			if (Math3D.BoxOnPlaneSide(mins, maxs, frustum[i]) == 2) {
+			if (Math3D.BoxOnPlaneSide(mins, maxs, frustum[i]) == 2)
 				return true;
-			}
 		}
 		return false;
 	}
@@ -391,7 +390,6 @@ public abstract class Main extends Base {
 		if (r_drawentities.value == 0.0f)
 			return;
 
-		Com.Printf(Defines.PRINT_ALL, "DEBUG CLIENT: Get entities for draw in that frame: " + r_newrefdef.num_entities + "\n");
 		// draw non-transparent first
 		int i;
 		for (i = 0; i < r_newrefdef.num_entities; i++) {
@@ -744,12 +742,11 @@ public abstract class Main extends Base {
 		//MYgluPerspective(r_newrefdef.fov_y, screenaspect, 4, 4096); 
 		
 		// CDawg 
-
-		if (r_newrefdef.map_view != 0) {
-			MYgluPerspective (r_newrefdef.fov_y, screenaspect, r_newrefdef.map_zoom-100, r_newrefdef.map_zoom+400);
-		} else {
-			MYgluPerspective (r_newrefdef.fov_y, screenaspect, 2, r_farclip.value);
-		}
+		
+		if (r_newrefdef.map_view != 0) 
+			MYgluPerspective (r_newrefdef.fov_y, screenaspect, r_newrefdef.map_zoom-100, r_newrefdef.map_zoom+400); 
+		else 
+			MYgluPerspective (r_newrefdef.fov_y, screenaspect, 4, r_farclip.value);
 		// CDawg 
 		
 		gl.glCullFace(GL_FRONT); 
