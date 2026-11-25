@@ -1108,31 +1108,14 @@ public class SV_MAIN implements JakeServer {
         try {
             String basedir = FS.getFs_basedir().string;
             String gamedir = FS.fs_gamedirvar.string;
-            if (gamedir == null || gamedir.isEmpty()) {
-                gamedir = "baseq2";
-            }
-            URLClassLoader mod = GameModLoader.loadMod(basedir, gamedir);
-            Class<?> game = null;
-            if (mod == null){
-                String fallbackClass = gamedir.equals("baseq2") ? "jake2.game.GameExportsImpl" : "flee.dh.GameExportsImpl";
-                game = Class.forName(fallbackClass);
-            }
-            else{
-                try (InputStream is = mod.getResourceAsStream("qore-module.properties");) {
-                    if (is == null){
-                        throw new IllegalStateException("Where is qore-module.properties in " + gamedir + ".jar");
-                    }
-                    Properties modProperties = new Properties();
-                    modProperties.load(is);
-                    String className = modProperties.getProperty("entry.class");
-                    if (className == null || className.trim().isEmpty()) {
-                        throw new IllegalStateException("Where 'entry.class' key in qore-module.properties?");
-                    }
-                    game = mod.loadClass(className);
-                }
-            }
-            Constructor<?> constructor = game.getConstructor(GameImports.class);
+
+            // Get class from cache or load it for the first time
+            Class<?> gameClass = GameModLoader.getGameClass(basedir, gamedir);
+
+            // Create instance
+            Constructor<?> constructor = gameClass.getConstructor(GameImports.class);
             return (GameExports) constructor.newInstance(gameImports);
+
         } catch (Exception e) {
             e.printStackTrace();
             Com.Error(ERR_FATAL, "Could not initialise game subsystem due to : " + e.getMessage() + "\n");
