@@ -782,7 +782,7 @@ public class Defines {
 	// R E N D E R E R 
 	////////////////////
 	public static final int MAX_DLIGHTS = 32;
-	public static final int MAX_ENTITIES = 128;
+	public static final int MAX_ENTITIES = 1024;
 	public static final int MAX_PARTICLES = 4096;
 
 	// gl_model.h
@@ -962,7 +962,7 @@ public class Defines {
 	public final static int MAX_MAP_EDGES = 128000;
 	public final static int MAX_MAP_SURFEDGES = 256000;
 	public final static int MAX_MAP_LIGHTING = 0x200000;
-	public final static int MAX_MAP_VISIBILITY = 0x100000;
+	public final static int MAX_MAP_VISIBILITY = 0x400000;
 
 	// key / value pair sizes
 	public final static int MAX_KEY = 32;

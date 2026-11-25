@@ -58,10 +58,10 @@ public abstract class Surf extends Draw {
 
 	static final int LIGHTMAP_BYTES = 4;
 
-	static final int BLOCK_WIDTH = 128;
-	static final int BLOCK_HEIGHT = 128;
+	static final int BLOCK_WIDTH = 256;
+	static final int BLOCK_HEIGHT = 256;
 
-	static final int MAX_LIGHTMAPS = 128;
+	static final int MAX_LIGHTMAPS = 256;
 
 	int c_visible_lightmaps;
 	int c_visible_textures;
@@ -411,7 +411,7 @@ public abstract class Surf extends Draw {
 	}
 
 	// direct buffer
-	private final IntBuffer temp = Lib.newIntBuffer(128 * 128, ByteOrder.LITTLE_ENDIAN);
+	private final IntBuffer temp = Lib.newIntBuffer(256 * 256, ByteOrder.LITTLE_ENDIAN);
 	
 	/**
 	 * GL_RenderLightmappedPoly
@@ -1210,7 +1210,7 @@ public abstract class Surf extends Draw {
 	}
 
 	lightstyle_t[] lightstyles;
-	private final IntBuffer dummy = Lib.newIntBuffer(128*128);
+	private final IntBuffer dummy = Lib.newIntBuffer(256*256);
 
 	/**
 	 * GL_BeginBuildingLightmaps

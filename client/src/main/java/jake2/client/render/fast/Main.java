@@ -166,6 +166,7 @@ public abstract class Main extends Base {
 	cvar_t r_nocull;
 	cvar_t r_lerpmodels;
 	cvar_t r_lefthand;
+	cvar_t r_farclip;
 
 	cvar_t r_lightlevel;
 	// FIXME: This is a HACK to get the client's light level
@@ -745,7 +746,7 @@ public abstract class Main extends Base {
 		if (r_newrefdef.map_view != 0) 
 			MYgluPerspective (r_newrefdef.fov_y, screenaspect, r_newrefdef.map_zoom-100, r_newrefdef.map_zoom+400); 
 		else 
-			MYgluPerspective (r_newrefdef.fov_y, screenaspect, 4, 4096*4); 
+			MYgluPerspective (r_newrefdef.fov_y, screenaspect, 4, r_farclip.value);
 		// CDawg 
 		
 		gl.glCullFace(GL_FRONT); 
@@ -950,6 +951,7 @@ public abstract class Main extends Base {
 		r_speeds = Cvar.getInstance().Get("r_speeds", "0", 0);
 
 		r_lightlevel = Cvar.getInstance().Get("r_lightlevel", "1", 0);
+		r_farclip = Cvar.getInstance().Get("r_farclip", "65536", 0);
 
 		gl_modeltris = Cvar.getInstance().Get("gl_modeltris", "0", 0);
 		gl_modelbbox = Cvar.getInstance().Get("gl_modelbbox", "0", 0);
