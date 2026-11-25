@@ -23,10 +23,13 @@
 package jake2.server;
 
 import jake2.qcommon.*;
+import jake2.qcommon.exec.Cvar;
+import jake2.qcommon.exec.cvar_t;
 import jake2.qcommon.network.messages.server.*;
 import jake2.qcommon.util.Math3D;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -47,12 +50,17 @@ public class SV_ENTS {
     private final entity_state_t[] client_entities; // [num_client_entities]
     private int next_client_entities; // next client_entity to use
 
+    cvar_t sv_novis;
+
+
 
     public SV_ENTS(GameImportsImpl gameImports, int clientEntitiesMax) {
         fatpvs = new byte[65536 / 8];
         this.gameImports = gameImports;
 
         maxClientEntities = clientEntitiesMax;
+
+        sv_novis = Cvar.getInstance().Get("sv_novis", "0", 0);
 
         // Clear all client entity states
         client_entities = new entity_state_t[maxClientEntities];
@@ -287,6 +295,8 @@ public class SV_ENTS {
         // calculate the visible areas
         frame.areabytes = gameImports.cm.CM_WriteAreaBits(frame.areabits, clientarea);
 
+        Arrays.fill(frame.areabits, (byte) 0xFF);
+
         // grab the current player_state_t
         frame.ps.set(clent.getClient().getPlayerState());
 
@@ -311,7 +321,7 @@ public class SV_ENTS {
 
             // ignore if not touching a PV leaf
             // check area
-            if (ent != clent) {
+            if (ent != clent && sv_novis.value == 0) {
                 if (!gameImports.cm.CM_AreasConnected(clientarea, ent.areanum)) {
                 	// doors can legally straddle two areas, so we may need to check another one
                     if (0 == ent.areanum2 || !gameImports.cm.CM_AreasConnected(clientarea, ent.areanum2))
