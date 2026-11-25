@@ -388,6 +388,10 @@ public class SV_ENTS {
 
             next_client_entities++;
             frame.num_entities++;
+            if (frame.num_entities <= 10) {
+                Com.Printf("SV: ent e=" + e + " model=" + ent.s.modelindex
+                        + " org=" + ent.s.origin[0] + "," + ent.s.origin[1] + "," + ent.s.origin[2] + "\n");
+            }
         }
     }
 }

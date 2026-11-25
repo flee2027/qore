@@ -624,6 +624,10 @@ public class CL_ents {
 
 			// add to refresh list
 			V.AddEntity(ent);
+			if (s1.number <= 10) {
+				Com.Printf("CL: ent " + s1.number + " model=" + (ent.model != null ? ent.model.name : "null")
+						+ " org=" + ent.origin[0] + "," + ent.origin[1] + "," + ent.origin[2] + "\n");
+			}
 
 			// color shells generate a seperate entity for the main model
 			if ((effects & Defines.EF_COLOR_SHELL) != 0) {
