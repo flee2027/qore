@@ -18,31 +18,39 @@ dependencies {
     testImplementation(project(":game"))
 }
 
-tasks.register("copyNatives") {
-    doLast {
-        copy {
-            val platforms = listOf("windows", "linux", "osx")
-            duplicatesStrategy = DuplicatesStrategy.WARN
-            platforms.forEach { pl ->
-                val nativeLibs = configurations["runtimeClasspath"].resolvedConfiguration.resolvedArtifacts.filter {
-                    it.classifier == "natives-$pl"
-                }
-                nativeLibs.forEach {
-                    from(zipTree(it.file))
-                }
+tasks.register<Copy>("copyNatives") {
+    val platforms = listOf("windows", "linux", "osx")
+    duplicatesStrategy = DuplicatesStrategy.WARN
+
+    platforms.forEach { pl ->
+        val nativeArtifacts = configurations.runtimeClasspath.get().resolvedConfiguration.resolvedArtifacts.filter {
+            it.classifier == "natives-$pl"
+        }
+        nativeArtifacts.forEach { artifact ->
+            from(zipTree(artifact.file))
+        }
+    }
+    into(layout.buildDirectory.dir("natives"))
+}
+
+distributions {
+    main {
+        contents {
+            from(layout.buildDirectory.dir("natives")) {
+                into("lib")
             }
-            into("${buildDir}/natives")
         }
     }
 }
 
-tasks.named("installDist").configure {
-    dependsOn("copyNatives")
+tasks.named<JavaExec>("run") {
+    dependsOn("copyNatives", "installDist")
+    val libPath = layout.buildDirectory.dir("install/fullgame/lib").get().asFile.absolutePath
+    systemProperty("java.library.path", libPath)
 }
 
 tasks.register("buildQoreDist") {
-    dependsOn("jar", "copyNatives")
-
+    dependsOn("jar", "copyNatives", ":game:jar")
     val distDir = layout.buildDirectory.dir("qore-release").get().asFile
 
     doLast {
@@ -63,26 +71,24 @@ tasks.register("buildQoreDist") {
         }
 
         copy {
-            from("${buildDir}/natives")
+            from(layout.buildDirectory.dir("natives").get().asFile)
             into(libDir)
         }
 
         val shScript = File(distDir, "qore.sh")
         shScript.writeText("""
             #!/bin/sh
-            
             export GDK_BACKEND=x11
             export SDL_VIDEODRIVER=x11
-            
             APP_HOME=${'$'}(cd "${'$'}(dirname "${'$'}0")" && pwd)
             
-            if [ -n "${'$'}JAVA_HOME" ]; then
+            if [ -n "${'$'}JAVA_HOME" ] && [ -x "${'$'}JAVA_HOME/bin/java" ]; then
                 JAVACMD="${'$'}JAVA_HOME/bin/java"
             else
                 JAVACMD="java"
             fi
             
-            exec "${'$'}JAVACMD" -cp "qore.jar:lib/*" jake2.fullgame.Jake2 "${'$'}@"
+            exec "${'$'}JAVACMD" -Djava.library.path="${'$'}APP_HOME/lib" -cp "qore.jar:lib/*" jake2.fullgame.Jake2 "${'$'}@"
         """.trimIndent())
         shScript.setExecutable(true)
 
@@ -90,20 +96,19 @@ tasks.register("buildQoreDist") {
         batScript.writeText("""
             @echo off
             setlocal
-            
             set APP_HOME=%~dp0
-            
-            if defined JAVA_HOME (
-                set JAVACMD="%JAVA_HOME%\bin\java.exe"
-            ) else (
-                set JAVACMD="java.exe"
-            )
-            
-            %JAVACMD% -cp "qore.jar;lib/*" jake2.fullgame.Jake2 %*
-            
+            if defined JAVA_HOME (set JAVACMD="%JAVA_HOME%\bin\java.exe") else (set JAVACMD="java.exe")
+            %JAVACMD% -Djava.library.path="%APP_HOME%lib" -cp "qore.jar;lib/*" jake2.fullgame.Jake2 %*
             endlocal
         """.trimIndent())
 
         println("Build successful. Output directory: ${distDir.absolutePath}")
     }
+}
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+    kotlinOptions.jvmTarget = "17"
+}
+tasks.withType<JavaCompile> {
+    sourceCompatibility = "17"
+    targetCompatibility = "17"
 }
