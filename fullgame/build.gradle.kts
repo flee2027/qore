@@ -50,7 +50,7 @@ tasks.named<JavaExec>("run") {
 }
 
 tasks.register("buildQoreDist") {
-    dependsOn("jar", "copyNatives", ":game:jar")
+    dependsOn("jar", "copyNatives", ":game:jar", ":dh:jar")
     val distDir = layout.buildDirectory.dir("qore-release").get().asFile
 
     doLast {
