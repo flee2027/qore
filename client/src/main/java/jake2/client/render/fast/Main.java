@@ -390,6 +390,11 @@ public abstract class Main extends Base {
 		if (r_drawentities.value == 0.0f)
 			return;
 
+		Com.Printf("R_DrawEntitiesOnList: num=" + r_newrefdef.num_entities
+				+ " r_drawentities=" + r_drawentities.value
+				+ " r_nocull=" + r_nocull.value
+				+ " farclip=" + r_farclip.value + "\n");
+
 		// draw non-transparent first
 		int i;
 		for (i = 0; i < r_newrefdef.num_entities; i++) {

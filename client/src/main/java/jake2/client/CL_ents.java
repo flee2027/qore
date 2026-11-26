@@ -424,6 +424,10 @@ public class CL_ents {
 		for (pnum = 0; pnum < frame.num_entities; pnum++) {
 			s1 = ClientGlobals.cl_parse_entities[(frame.parse_entities + pnum) & (Defines.MAX_PARSE_ENTITIES - 1)];
 
+			if (s1.number <= 20) {
+				Com.Printf("CL recv: num=" + s1.number + " modelindex=" + s1.modelindex + "\n");
+			}
+
 			boolean isclientviewer = false;
 			cent = ClientGlobals.cl_entities[s1.number];
 
@@ -598,9 +602,10 @@ public class CL_ents {
 			}
 
 			// if set to invisible, skip
-			if (s1.modelindex == 0)
+			if (s1.modelindex == 0) {
+				if (s1.number <= 20) Com.Printf("CL skip modelindex=0: num=" + s1.number + "\n");
 				continue;
-
+			}
 			if ((effects & Defines.EF_BFG) != 0) {
 				ent.flags |= Defines.RF_TRANSLUCENT;
 				ent.alpha = 0.30f;
@@ -622,12 +627,15 @@ public class CL_ents {
 			}
 			//	  pmm
 
+			if (s1.number <= 20) {
+				Com.Printf("CL add: num=" + s1.number
+						+ " model=" + (ent.model != null ? ent.model.name : "null")
+						+ " org=" + ent.origin[0] + "," + ent.origin[1] + "," + ent.origin[2]
+						+ " flags=" + ent.flags + "\n");
+			}
+
 			// add to refresh list
 			V.AddEntity(ent);
-			if (s1.number <= 10) {
-				Com.Printf("CL: ent " + s1.number + " model=" + (ent.model != null ? ent.model.name : "null")
-						+ " org=" + ent.origin[0] + "," + ent.origin[1] + "," + ent.origin[2] + "\n");
-			}
 
 			// color shells generate a seperate entity for the main model
 			if ((effects & Defines.EF_COLOR_SHELL) != 0) {

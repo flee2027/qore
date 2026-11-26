@@ -923,6 +923,10 @@ public abstract class Surf extends Draw {
 			Com.DPrintf("num triangles: " + polys.size() + "\n");
 		}
 		polys = new Vector();
+		Com.Printf("R_DrawWorld: r_novis=" + r_novis.value
+				+ " r_nocull=" + r_nocull.value
+				+ " farclip=" + r_farclip.value
+				+ " c_visible_textures=" + c_visible_textures + "\n");
 	}
 
 	final byte[] fatvis = new byte[Defines.MAX_MAP_LEAFS / 8];
