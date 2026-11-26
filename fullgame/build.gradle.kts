@@ -14,7 +14,6 @@ dependencies {
     implementation(project(":client"))
     implementation(project(":server"))
     runtimeOnly(project(":game"))
-    runtimeOnly(project(":dh"))
     testImplementation(project(":game"))
 }
 
@@ -50,7 +49,7 @@ tasks.named<JavaExec>("run") {
 }
 
 tasks.register("buildQoreDist") {
-    dependsOn("jar", "copyNatives", ":game:jar", ":dh:jar")
+    dependsOn("jar", "copyNatives", ":game:jar")
     val distDir = layout.buildDirectory.dir("qore-release").get().asFile
 
     doLast {

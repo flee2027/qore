@@ -424,10 +424,6 @@ public class CL_ents {
 		for (pnum = 0; pnum < frame.num_entities; pnum++) {
 			s1 = ClientGlobals.cl_parse_entities[(frame.parse_entities + pnum) & (Defines.MAX_PARSE_ENTITIES - 1)];
 
-			if (s1.number <= 20) {
-				Com.Printf("CL recv: num=" + s1.number + " modelindex=" + s1.modelindex + "\n");
-			}
-
 			boolean isclientviewer = false;
 			cent = ClientGlobals.cl_entities[s1.number];
 
@@ -603,7 +599,6 @@ public class CL_ents {
 
 			// if set to invisible, skip
 			if (s1.modelindex == 0) {
-				if (s1.number <= 20) Com.Printf("CL skip modelindex=0: num=" + s1.number + "\n");
 				continue;
 			}
 			if ((effects & Defines.EF_BFG) != 0) {
@@ -626,13 +621,6 @@ public class CL_ents {
 					ent.alpha = 0.3f;
 			}
 			//	  pmm
-
-			if (s1.number <= 20) {
-				Com.Printf("CL add: num=" + s1.number
-						+ " model=" + (ent.model != null ? ent.model.name : "null")
-						+ " org=" + ent.origin[0] + "," + ent.origin[1] + "," + ent.origin[2]
-						+ " flags=" + ent.flags + "\n");
-			}
 
 			// add to refresh list
 			V.AddEntity(ent);

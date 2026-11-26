@@ -37,7 +37,7 @@ import jake2.qcommon.util.Vec3Cache;
 /**
  * Warp
  *  
- * @author cwei
+ * @author cwei/
  */
 public abstract class Warp extends Model {
 	// warpsin.h
@@ -584,9 +584,9 @@ public abstract class Warp extends Model {
 	 */
 	void MakeSkyVec(float s, float t, int axis)
 	{
-		b[0] = s*2300;
-		b[1] = t*2300;
-		b[2] = 2300;
+		b[0] = s*32000;
+		b[1] = t*32000;
+		b[2] = 32000;
 
 		int j, k;
 		for (j=0 ; j<3 ; j++)

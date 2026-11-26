@@ -235,6 +235,13 @@ public abstract class Main extends Base {
 	 * Returns true if the box is completely outside the frustum
 	 */
 	final boolean R_CullBox(float[] mins, float[] maxs) {
+		assert(mins.length == 3 && maxs.length == 3) : "vec3_t bug";
+		if (r_nocull.value != 0)
+			return false;
+		for (int i = 0; i < 4; i++) {
+			if (Math3D.BoxOnPlaneSide(mins, maxs, frustum[i]) == 2)
+				return true;
+		}
 		return false;
 	}
 
@@ -380,11 +387,6 @@ public abstract class Main extends Base {
 	void R_DrawEntitiesOnList() {
 		if (r_drawentities.value == 0.0f)
 			return;
-
-		Com.Printf("R_DrawEntitiesOnList: num=" + r_newrefdef.num_entities
-				+ " r_drawentities=" + r_drawentities.value
-				+ " r_nocull=" + r_nocull.value
-				+ " farclip=" + r_farclip.value + "\n");
 
 		// draw non-transparent first
 		int i;
@@ -742,7 +744,7 @@ public abstract class Main extends Base {
 		if (r_newrefdef.map_view != 0) 
 			MYgluPerspective (r_newrefdef.fov_y, screenaspect, r_newrefdef.map_zoom-100, r_newrefdef.map_zoom+400); 
 		else 
-			MYgluPerspective (r_newrefdef.fov_y, screenaspect, 4, r_farclip.value);
+			MYgluPerspective (r_newrefdef.fov_y, screenaspect, 32.0, r_farclip.value);
 		// CDawg 
 		
 		gl.glCullFace(GL_FRONT); 
