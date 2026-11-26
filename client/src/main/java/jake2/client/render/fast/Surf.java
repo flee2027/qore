@@ -936,72 +936,15 @@ public abstract class Surf extends Draw {
 	 * Mark the leaves and nodes that are in the PVS for the current
 	 * cluster
 	 */
-	void R_MarkLeaves()
-	{
-		if (r_oldviewcluster == r_viewcluster && r_oldviewcluster2 == r_viewcluster2 && r_novis.value == 0 && r_viewcluster != -1)
-			return;
-
-		// development aid to let you run around and see exactly where
-		// the pvs ends
-		if (gl_lockpvs.value != 0)
-			return;
-
+	void R_MarkLeaves() {
 		r_visframecount++;
 		r_oldviewcluster = r_viewcluster;
 		r_oldviewcluster2 = r_viewcluster2;
 
-		int i;
-		if (r_novis.value != 0 || r_viewcluster == -1 || r_worldmodel.vis == null)
-		{
-			// mark everything
-			for (i=0 ; i<r_worldmodel.numleafs ; i++)
-				r_worldmodel.leafs[i].visframe = r_visframecount;
-			for (i=0 ; i<r_worldmodel.numnodes ; i++)
-				r_worldmodel.nodes[i].visframe = r_visframecount;
-			return;
-		}
-
-		byte[] vis = Mod_ClusterPVS(r_viewcluster, r_worldmodel);
-		int c;
-		// may have to combine two clusters because of solid water boundaries
-		if (r_viewcluster2 != r_viewcluster)
-		{
-			// memcpy (fatvis, vis, (r_worldmodel.numleafs+7)/8);
-			System.arraycopy(vis, 0, fatvis, 0, (r_worldmodel.numleafs+7) >> 3);
-			vis = Mod_ClusterPVS(r_viewcluster2, r_worldmodel);
-			c = (r_worldmodel.numleafs + 31) >> 5;
-			c <<= 2;
-			for (int k=0 ; k<c ; k+=4) {
-				fatvis[k] |= vis[k];
-				fatvis[k + 1] |= vis[k + 1];
-				fatvis[k + 2] |= vis[k + 2];
-				fatvis[k + 3] |= vis[k + 3];
-			}
-
-			vis = fatvis;
-		}
-
-		mnode_t node;
-		mleaf_t leaf;
-		int cluster;
-		for ( i=0; i < r_worldmodel.numleafs; i++)
-		{
-			leaf = r_worldmodel.leafs[i];
-			cluster = leaf.cluster;
-			if (cluster == -1)
-				continue;
-			if (((vis[cluster>>3] & 0xFF) & (1 << (cluster & 7))) != 0)
-			{
-				node = (mnode_t)leaf;
-				do
-				{
-					if (node.visframe == r_visframecount)
-						break;
-					node.visframe = r_visframecount;
-					node = node.parent;
-				} while (node != null);
-			}
-		}
+		for (int i = 0; i < r_worldmodel.numleafs; i++)
+			r_worldmodel.leafs[i].visframe = r_visframecount;
+		for (int i = 0; i < r_worldmodel.numnodes; i++)
+			r_worldmodel.nodes[i].visframe = r_visframecount;
 	}
 
 	/*
