@@ -1586,6 +1586,11 @@ public class CM {
     public byte[] phsrow = new byte[Defines.MAX_MAP_LEAFS / 8];
 
     public byte[] CM_ClusterPVS(int cluster) {
+        if (map_vis == null || cluster < 0 || cluster >= map_vis.numclusters) {
+            Arrays.fill(pvsrow, (byte) 0xFF);
+            return pvsrow;
+        }
+
         if (cluster == -1)
             Arrays.fill(pvsrow, 0, (numclusters + 7) >> 3, (byte) 0);
         else
