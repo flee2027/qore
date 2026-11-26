@@ -235,15 +235,6 @@ public abstract class Main extends Base {
 	 * Returns true if the box is completely outside the frustum
 	 */
 	final boolean R_CullBox(float[] mins, float[] maxs) {
-		assert(mins.length == 3 && maxs.length == 3) : "vec3_t bug";
-
-		if (r_nocull.value != 0)
-			return false;
-
-		for (int i = 0; i < 4; i++) {
-			if (Math3D.BoxOnPlaneSide(mins, maxs, frustum[i]) == 2)
-				return true;
-		}
 		return false;
 	}
 
