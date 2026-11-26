@@ -706,19 +706,39 @@ public class qfiles {
 	// #define	DVIS_PHS	1
 
 	public static class dvis_t {
+		public int numclusters;
+		public int bitofs[][];
 
 		public dvis_t(ByteBuffer bb) {
-			numclusters = bb.getInt();
-			bitofs = new int[numclusters][2];
+			try {
+				if (bb.remaining() < 4) {
+					throw new Exception("VIS data too short to read numclusters");
+				}
 
-			for (int i = 0; i < numclusters; i++) {
-				bitofs[i][0] = bb.getInt();
-				bitofs[i][1] = bb.getInt();
+				numclusters = bb.getInt();
+
+				if (numclusters < 1 || numclusters > 100000) {
+					throw new Exception("Invalid numclusters value: " + numclusters);
+				}
+
+				int bytesNeeded = numclusters * 2 * 4;
+				if (bb.remaining() < bytesNeeded) {
+					throw new Exception("VIS data truncated. Needed: " + bytesNeeded + ", Remaining: " + bb.remaining());
+				}
+
+				bitofs = new int[numclusters][2];
+				for (int i = 0; i < numclusters; i++) {
+					bitofs[i][0] = bb.getInt();
+					bitofs[i][1] = bb.getInt();
+				}
+			} catch (Exception e) {
+				System.err.println("WARNING: Corrupted VIS data detected (" + e.getMessage() + "). Fallback to full visibility.");
+				numclusters = 1;
+				bitofs = new int[1][2];
+				bitofs[0][0] = 0;
+				bitofs[0][1] = 0;
 			}
 		}
-
-		public int numclusters;
-		public int bitofs[][] = new int[8][2]; // bitofs[numclusters][2]	
 	}
 	
 	// each area has a list of portals that lead into other areas
